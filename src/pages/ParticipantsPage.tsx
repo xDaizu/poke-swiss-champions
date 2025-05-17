@@ -121,9 +121,7 @@ export default function ParticipantsPage() {
     setTournament({
       rounds: 4,
       matches: [],
-      currentRound: 1,
-      status: 'not-started',
-      // Add any other default tournament fields as needed
+      currentRound: 1
     });
     // Import from CSV
     try {

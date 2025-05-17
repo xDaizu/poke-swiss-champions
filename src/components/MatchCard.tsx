@@ -8,9 +8,10 @@ import { useState } from 'react';
 interface MatchCardProps {
   match: Match;
   publicView?: boolean;
+  onShowBattle?: () => void;
 }
 
-export default function MatchCard({ match, publicView = false }: MatchCardProps) {
+export default function MatchCard({ match, publicView = false, onShowBattle }: MatchCardProps) {
   const { getParticipantById, updateMatchResult, toggleMatchPublic } = useAppContext();
   
   const participant1 = getParticipantById(match.participant1Id);
@@ -91,7 +92,20 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
           </div>
           
           <div className="text-center w-[10%] flex flex-col items-center justify-center">
-            <span>VS</span>
+            {/* VS button for public view */}
+            {publicView ? (
+              <button
+                type="button"
+                className="text-2xl font-bold text-pokemon-red hover:scale-125 transition-transform duration-200"
+                style={{ outline: 'none', border: 'none', background: 'none', cursor: 'pointer' }}
+                onClick={onShowBattle}
+                aria-label="Mostrar batalla"
+              >
+                VS
+              </button>
+            ) : (
+              <span>VS</span>
+            )}
             {/* Eye icon for public/hidden toggle (admin only) */}
             {!publicView && (
               <button

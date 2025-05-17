@@ -56,21 +56,21 @@ const BattleOverlay: React.FC<BattleOverlayProps> = ({ match, onClose, participa
   
   return (
     <div className={`fixed inset-0 z-50 flex flex-col min-h-screen bg-black/70 transition-opacity duration-1000 ${battleAnimatingOut ? 'opacity-0' : 'opacity-100'}`}>
-      {/* Battle cards container - positioned at exactly 1/4 of screen height */}
-      <div className="relative w-full flex-1">
-        {/* Left card */}
-        <div
-          className={`fixed ${battleAnimatingOut ? 'animate-exitLeftCard' : ''}`}
-          style={{ zIndex: 2, top: '25vh', left: '15%' }}
-        >
-          <BattleCard participant={p1} align="left" />
+      {/* Responsive battle fields: column on mobile, row on desktop */}
+      <div className="flex flex-col md:flex-row w-full h-full flex-1">
+        {/* Field 1 */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className={`${battleAnimatingOut ? 'animate-exitLeftCard' : ''}`}
+            style={{ zIndex: 2, width: '300px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BattleCard participant={p1} align="left" />
+          </div>
         </div>
-        {/* Right card */}
-        <div
-          className={`fixed ${battleAnimatingOut ? 'animate-exitRightCard' : ''}`}
-          style={{ zIndex: 2, top: '25vh', right: '15%' }}
-        >
-          <BattleCard participant={p2} align="right" />
+        {/* Field 2 */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className={`${battleAnimatingOut ? 'animate-exitRightCard' : ''}`}
+            style={{ zIndex: 2, width: '300px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BattleCard participant={p2} align="right" />
+          </div>
         </div>
       </div>
       <div className="flex justify-center pb-8">

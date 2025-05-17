@@ -14,10 +14,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight, Edit, Plus, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { Participant } from '../types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+// Define round colors for containers
+const ROUND_COLORS = [
+  'bg-[#F2FCE2]', // Soft Green
+  'bg-[#FEF7CD]', // Soft Yellow
+  'bg-[#E5DEFF]', // Soft Purple
+  'bg-[#D3E4FD]'  // Soft Blue
+];
 
 export default function TournamentPage() {
   const { 
@@ -30,8 +38,8 @@ export default function TournamentPage() {
   } = useAppContext();
   
   const [customRounds, setCustomRounds] = useState(tournament.rounds.toString());
-  const [currentRoundView, setCurrentRoundView] = useState(tournament.currentRound || 1);
   const [isMatchDialogOpen, setIsMatchDialogOpen] = useState(false);
+  const [selectedRoundForMatch, setSelectedRoundForMatch] = useState<number>(1);
   const [participant1Id, setParticipant1Id] = useState<string>('');
   const [participant2Id, setParticipant2Id] = useState<string>('');
   
@@ -54,22 +62,12 @@ export default function TournamentPage() {
       setRounds(numValue);
     }
   };
-  
-  const canNavigateToPrevRound = currentRoundView > 1;
-  const canNavigateToNextRound = currentRoundView < tournament.currentRound;
-  
-  const currentRoundMatches = tournament.matches.filter(m => m.round === currentRoundView);
-  
-  const handlePrevRound = () => {
-    if (canNavigateToPrevRound) {
-      setCurrentRoundView(currentRoundView - 1);
-    }
-  };
-  
-  const handleNextRound = () => {
-    if (canNavigateToNextRound) {
-      setCurrentRoundView(currentRoundView + 1);
-    }
+
+  const openAddMatchDialog = (roundNumber: number) => {
+    setSelectedRoundForMatch(roundNumber);
+    setParticipant1Id('');
+    setParticipant2Id('');
+    setIsMatchDialogOpen(true);
   };
 
   const handleAddMatch = () => {
@@ -79,7 +77,7 @@ export default function TournamentPage() {
     }
 
     // Validate participant selection
-    createCustomMatch(currentRoundView, participant1Id, participant2Id || null);
+    createCustomMatch(selectedRoundForMatch, participant1Id, participant2Id || null);
     setIsMatchDialogOpen(false);
     setParticipant1Id('');
     setParticipant2Id('');
@@ -91,6 +89,22 @@ export default function TournamentPage() {
       removeMatch(matchId);
       toast.success('Match removed successfully');
     }
+  };
+
+  // Get participants who aren't already fighting in the selected round
+  const getAvailableParticipantsForRound = (round: number, excludeParticipantId: string | null = null) => {
+    const matchesInRound = tournament.matches.filter(m => m.round === round);
+    const participantsInRound = new Set<string>();
+    
+    matchesInRound.forEach(match => {
+      if (match.participant1Id) participantsInRound.add(match.participant1Id);
+      if (match.participant2Id) participantsInRound.add(match.participant2Id);
+    });
+    
+    return participants.filter(p => 
+      !participantsInRound.has(p.id) || 
+      (excludeParticipantId && p.id === excludeParticipantId)
+    );
   };
 
   return (
@@ -149,136 +163,133 @@ export default function TournamentPage() {
         </CardFooter>
       </Card>
       
-      {tournament.currentRound > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold">
-              Round {currentRoundView} Matches
-            </h3>
-            
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePrevRound}
-                disabled={!canNavigateToPrevRound}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              
-              <span>
-                {currentRoundView} of {tournament.currentRound}
-              </span>
-              
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNextRound}
-                disabled={!canNavigateToNextRound}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+      <div className="space-y-8">
+        <h3 className="text-xl font-bold">Tournament Rounds</h3>
+        
+        {Array.from({ length: tournament.rounds || 4 }).map((_, index) => {
+          const roundNumber = index + 1;
+          const roundMatches = tournament.matches.filter(m => m.round === roundNumber);
+          const roundActive = tournament.currentRound >= roundNumber;
+          const roundColor = ROUND_COLORS[index % ROUND_COLORS.length];
           
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-gray-500">Customize matches for this round</p>
-            <Button 
-              onClick={() => setIsMatchDialogOpen(true)}
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-2" /> Add Custom Match
-            </Button>
-          </div>
-          
-          {currentRoundMatches.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-gray-500">No matches for this round</p>
-              <Button 
-                onClick={() => setIsMatchDialogOpen(true)}
-                className="mt-4"
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Match
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentRoundMatches.map(match => (
-                <div key={match.id} className="relative">
+          return (
+            <Card key={roundNumber} className={`${roundColor} border-2 ${roundActive ? 'border-pokemon-red' : 'border-gray-200'}`}>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle>Round {roundNumber}</CardTitle>
                   <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-gray-200 hover:bg-gray-300 p-1"
-                    onClick={() => handleRemoveMatch(match.id)}
+                    onClick={() => openAddMatchDialog(roundNumber)}
+                    size="sm"
+                    variant="outline"
+                    className="bg-white hover:bg-gray-100"
                   >
-                    <X size={12} />
+                    <Plus className="h-4 w-4 mr-2" /> Add Match
                   </Button>
-                  <MatchCard key={match.id} match={match} />
                 </div>
-              ))}
-            </div>
-          )}
+                <CardDescription>
+                  {roundActive ? 'Active round' : 'Upcoming round'} • {roundMatches.length} matches
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent>
+                {roundMatches.length === 0 ? (
+                  <div className="text-center py-8 bg-white/50 rounded-md">
+                    <p className="text-gray-500">No matches for this round yet</p>
+                    <Button 
+                      onClick={() => openAddMatchDialog(roundNumber)}
+                      variant="outline"
+                      className="mt-4 bg-white hover:bg-gray-100"
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> Create First Match
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {roundMatches.map(match => (
+                      <div key={match.id} className="relative">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-gray-200 hover:bg-gray-300 p-1"
+                          onClick={() => handleRemoveMatch(match.id)}
+                        >
+                          <X size={12} />
+                        </Button>
+                        <MatchCard key={match.id} match={match} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+      
+      <Dialog open={isMatchDialogOpen} onOpenChange={setIsMatchDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Custom Match for Round {selectedRoundForMatch}</DialogTitle>
+          </DialogHeader>
           
-          <Dialog open={isMatchDialogOpen} onOpenChange={setIsMatchDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Custom Match for Round {currentRoundView}</DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-4 py-4">
-                <div>
-                  <Label htmlFor="participant1">Participant 1 (Required)</Label>
-                  <Select 
-                    value={participant1Id} 
-                    onValueChange={setParticipant1Id}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select participant 1" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {participants.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name} ({p.title})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="participant2">Participant 2 (Optional, leave empty for BYE)</Label>
-                  <Select 
-                    value={participant2Id} 
-                    onValueChange={setParticipant2Id}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select participant 2 (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {participants
-                        .filter(p => p.id !== participant1Id)
-                        .map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.name} ({p.title})
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddMatch}>
-                  Add Match
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="participant1">Participant 1 (Required)</Label>
+              <Select 
+                value={participant1Id} 
+                onValueChange={(value) => {
+                  setParticipant1Id(value);
+                  // Reset participant2 if they selected the same participant
+                  if (value === participant2Id) {
+                    setParticipant2Id('');
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select participant 1" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableParticipantsForRound(selectedRoundForMatch).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} ({p.title})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="participant2">Participant 2 (Optional, leave empty for BYE)</Label>
+              <Select 
+                value={participant2Id} 
+                onValueChange={setParticipant2Id}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select participant 2 (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableParticipantsForRound(selectedRoundForMatch, participant1Id)
+                    .filter(p => p.id !== participant1Id)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} ({p.title})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddMatch}>
+              Add Match
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

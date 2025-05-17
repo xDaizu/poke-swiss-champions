@@ -31,7 +31,18 @@ export default function PokemonTeamSelector({
 
   return (
     <div className="space-y-4">
-      <h3 className="font-bold text-lg">Pokémon Team</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="font-bold text-lg">Pokémon Team ({team.length}/{maxTeamSize})</h3>
+        {team.length > 0 && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => onChange([])}
+          >
+            Clear Team
+          </Button>
+        )}
+      </div>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
         {team.map((pokemon, index) => (

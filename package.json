@@ -13,7 +13,7 @@
     "test:run": "vitest run",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "postbuild": "cp dist/index.html dist/404.html"
+    "postbuild": "node -e \"require('fs').copyFileSync('dist/index.html', 'dist/404.html')\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

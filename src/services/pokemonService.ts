@@ -2,7 +2,7 @@
 import { Pokemon } from '../types';
 
 const GITHUB_URL = 'https://raw.githubusercontent.com/fanzeyi/pokemon.json/master';
-const POKEMON_COUNT = 151; // First generation only
+const POKEMON_COUNT = 649; // Expanded to include Pokemon up to Gen 5 (Black & White)
 
 export async function fetchPokemonList(): Promise<Pokemon[]> {
   try {

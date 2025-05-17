@@ -34,7 +34,8 @@ export default function TournamentPage() {
     setRounds, 
     startTournament,
     createCustomMatch,
-    removeMatch
+    removeMatch,
+    havePlayed
   } = useAppContext();
   
   const [customRounds, setCustomRounds] = useState(tournament.rounds.toString());
@@ -270,13 +271,27 @@ export default function TournamentPage() {
                 <SelectContent>
                   {getAvailableParticipantsForRound(selectedRoundForMatch, participant1Id)
                     .filter(p => p.id !== participant1Id)
-                    .map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name} ({p.title})
-                      </SelectItem>
-                    ))}
+                    .map((p) => {
+                      // Check if this participant already fought against participant1
+                      const alreadyFought = participant1Id && havePlayed(p.id, participant1Id);
+                      
+                      return (
+                        <SelectItem 
+                          key={p.id} 
+                          value={p.id}
+                          className={alreadyFought ? "text-red-500 font-medium" : ""}
+                        >
+                          {p.name} ({p.title}) {alreadyFought ? "- Rematch" : ""}
+                        </SelectItem>
+                      );
+                    })}
                 </SelectContent>
               </Select>
+              {participant1Id && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Note: Participants in red have already fought against this opponent in previous rounds.
+                </p>
+              )}
             </div>
           </div>
           

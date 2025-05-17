@@ -18,6 +18,7 @@ interface AppContextType {
   createCustomMatch: (round: number, participant1Id: string, participant2Id: string | null) => void;
   removeMatch: (matchId: string) => void;
   addParticipantsFromCsv: (csvData: string) => Promise<number>;
+  havePlayed: (id1: string, id2: string) => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -333,7 +334,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isMatchReady,
     createCustomMatch,
     removeMatch,
-    addParticipantsFromCsv
+    addParticipantsFromCsv,
+    havePlayed
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

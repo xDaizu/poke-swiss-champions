@@ -406,3 +406,27 @@ export const addParticipantsFromCsvStandalone = async (csvData: string, searchPo
   }
   return { count: newParticipants.length };
 };
+
+// Helper to parse a CSV line, handling quoted fields
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+      inQuotes = !inQuotes;
+    } else if (char === '\'' && (i === 0 || line[i-1] !== '\\')) {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  if (current.length > 0) {
+    result.push(current);
+  }
+  return result.map(part => part.trim());
+}

@@ -2,7 +2,8 @@ import { useAppContext } from '../context/AppContext';
 import { Match, MatchResult } from '../types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Moon, Pencil } from 'lucide-react';
+import { useState } from 'react';
 
 interface MatchCardProps {
   match: Match;
@@ -38,7 +39,9 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
 
   // Determine card background gradient based on result
   let cardBg = '';
-  if (match.result === 'win1') {
+  if (isBye) {
+    cardBg = 'bg-gradient-to-t from-blue-200 to-white';
+  } else if (match.result === 'win1') {
     cardBg = 'bg-gradient-to-r from-green-200 via-white to-white';
   } else if (match.result === 'win2') {
     cardBg = 'bg-gradient-to-l from-green-200 via-white to-white';
@@ -46,11 +49,17 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
     cardBg = 'bg-gradient-to-r from-white via-yellow-200 to-white';
   }
 
+  const [isEditing, setIsEditing] = useState(false);
+
   return (
-    <Card className={`pokemon-card w-full ${cardBg}`}>
-      {/* <CardHeader className="pb-2 text-center">
-        <CardTitle className="text-base">Combate {match.id.split('-').pop()}</CardTitle>
-      </CardHeader> */}
+    <Card className={`pokemon-card w-full relative ${cardBg}`}>
+      {/* BYE sleep icon */}
+      {isBye && (
+        <div className="absolute left-2 top-2 z-10 flex items-center text-blue-400">
+          <Moon size={22} className="mr-1" />
+          <span className="font-bold text-blue-400 text-xs">ZZZ</span>
+        </div>
+      )}
       
       <CardContent>
         <div className="flex items-center justify-between mb-4 pt-3">
@@ -138,11 +147,7 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
               <span className="font-medium text-gray-400">Aún sin decidir</span>
             )}
           </div>
-        ) : match.result ? (
-          <div className="text-center p-1 bg-gray-100 rounded-md">
-            <span className="font-medium">{getResultLabel()}</span>
-          </div>
-        ) : (
+        ) : isEditing || !match.result ? (
           <div className="flex w-full mt-2">
             {/* Player 1 win button */}
             <div className="w-2/5 flex justify-center">
@@ -150,7 +155,7 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
                 size="sm"
                 variant="outline"
                 className="text-xs py-1 h-auto"
-                onClick={() => handleResultClick('win1')}
+                onClick={() => { handleResultClick('win1'); setIsEditing(false); }}
                 disabled={isBye}
               >
                 {participant1?.name.split(' ')[0]} Gana
@@ -162,7 +167,7 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
                 size="sm"
                 variant="outline"
                 className="text-xs py-1 h-auto"
-                onClick={() => handleResultClick('tie')}
+                onClick={() => { handleResultClick('tie'); setIsEditing(false); }}
                 disabled={isBye}
               >
                 Empate
@@ -175,12 +180,30 @@ export default function MatchCard({ match, publicView = false }: MatchCardProps)
                   size="sm"
                   variant="outline"
                   className="text-xs py-1 h-auto"
-                  onClick={() => handleResultClick('win2')}
+                  onClick={() => { handleResultClick('win2'); setIsEditing(false); }}
                 >
                   {participant2?.name.split(' ')[0]} Gana
                 </Button>
               )}
             </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2">
+            <div className="text-center p-1 bg-gray-100 rounded-md">
+              <span className="font-medium">{getResultLabel()}</span>
+            </div>
+            {/* Edit button (admin only, if result is set) */}
+            {!publicView && match.result && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="ml-2"
+                title="Editar resultado"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil size={16} />
+              </Button>
+            )}
           </div>
         )}
       </CardContent>

@@ -1,4 +1,3 @@
-
 import { useAppContext } from '../context/AppContext';
 import { Match, MatchResult } from '../types';
 import { Button } from '@/components/ui/button';
@@ -23,22 +22,22 @@ export default function MatchCard({ match }: MatchCardProps) {
   const getResultLabel = () => {
     switch (match.result) {
       case 'win1':
-        return `${participant1?.name} Won`;
+        return `${participant1?.name} Ganó`;
       case 'win2':
-        return `${participant2?.name} Won`;
+        return `${participant2?.name} Ganó`;
       case 'tie':
-        return 'Tie';
+        return 'Empate';
       case 'bye':
         return 'Bye';
       default:
-        return 'Pending';
+        return 'Pendiente';
     }
   };
 
   return (
     <Card className="pokemon-card w-full">
       <CardHeader className="pb-2 text-center">
-        <CardTitle className="text-base">Match {match.id.split('-').pop()}</CardTitle>
+        <CardTitle className="text-base">Combate {match.id.split('-').pop()}</CardTitle>
       </CardHeader>
       
       <CardContent>
@@ -97,7 +96,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                 )}
               </div>
             ) : (
-              <span className="text-gray-500">Waiting...</span>
+              <span className="text-gray-500">Esperando...</span>
             )}
           </div>
         </div>
@@ -115,7 +114,7 @@ export default function MatchCard({ match }: MatchCardProps) {
               onClick={() => handleResultClick('win1')}
               disabled={isBye}
             >
-              {participant1?.name.split(' ')[0]} Wins
+              {participant1?.name.split(' ')[0]} Gana
             </Button>
             
             {!isBye && (
@@ -125,7 +124,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                 className="text-xs py-1 h-auto"
                 onClick={() => handleResultClick('win2')}
               >
-                {participant2?.name.split(' ')[0]} Wins
+                {participant2?.name.split(' ')[0]} Gana
               </Button>
             )}
             
@@ -136,7 +135,7 @@ export default function MatchCard({ match }: MatchCardProps) {
               onClick={() => handleResultClick('tie')}
               disabled={isBye}
             >
-              Tie
+              Empate
             </Button>
             
             {isBye && (

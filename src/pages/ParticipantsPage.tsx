@@ -33,19 +33,19 @@ export default function ParticipantsPage() {
   };
 
   const handleRemoveClick = (id: string) => {
-    if (confirm('Are you sure you want to remove this participant?')) {
+    if (confirm('¿Estás seguro de que deseas eliminar este participante?')) {
       removeParticipant(id);
-      toast.success('Participant removed successfully');
+      toast.success('Participante eliminado correctamente');
     }
   };
 
   const handleFormSubmit = (participant: Participant) => {
     if (editingParticipant) {
       editParticipant(participant);
-      toast.success('Participant updated successfully');
+      toast.success('Participante actualizado correctamente');
     } else {
       addParticipant(participant);
-      toast.success('Participant added successfully');
+      toast.success('Participante agregado correctamente');
     }
     setIsFormOpen(false);
   };
@@ -56,7 +56,7 @@ export default function ParticipantsPage() {
 
   const handleImportCsv = async () => {
     if (!csvData.trim()) {
-      toast.error('Please enter CSV data');
+      toast.error('Por favor, ingresa datos CSV');
       return;
     }
     
@@ -82,7 +82,7 @@ export default function ParticipantsPage() {
       if (result.error) {
         toast.error(result.error, {
           duration: 8000, // Show longer for detailed errors
-          description: 'Please correct the issues and try again'
+          description: 'Por favor, corrige los errores e inténtalo de nuevo'
         });
         return;
       }
@@ -94,17 +94,17 @@ export default function ParticipantsPage() {
           addParticipant(participant);
         }
         
-        toast.success(`Successfully imported ${result.count} participants`);
+        toast.success(`Se importaron correctamente ${result.count} participantes`);
         setCsvData('');
         setIsCsvImportOpen(false);
       } else {
-        toast.error('No valid participants found in CSV data');
+        toast.error('No se encontraron participantes válidos en los datos CSV');
       }
     } catch (error: any) {
       console.error('Import error:', error);
-      toast.error(error.message || 'Failed to import participants', {
+      toast.error(error.message || 'Error al importar participantes', {
         duration: 8000,
-        description: 'Please check the CSV format and try again'
+        description: 'Por favor, revisa el formato CSV e inténtalo de nuevo'
       });
     } finally {
       setIsImporting(false);
@@ -114,27 +114,27 @@ export default function ParticipantsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Tournament Participants</h2>
+        <h2 className="text-2xl font-bold">Participantes del Torneo</h2>
         <div className="space-x-2">
           <Button onClick={() => setIsCsvImportOpen(true)} variant="outline">
-            <Import className="mr-2 h-4 w-4" /> Import CSV
+            <Import className="mr-2 h-4 w-4" /> Importar CSV
           </Button>
           <Button onClick={handleAddClick}>
-            <Plus className="mr-2 h-4 w-4" /> Add Participant
+            <Plus className="mr-2 h-4 w-4" /> Agregar Participante
           </Button>
         </div>
       </div>
 
       {participants.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-lg text-gray-500">No participants yet</p>
-          <p className="text-gray-400">Add participants to start the tournament</p>
+          <p className="text-lg text-gray-500">Aún no hay participantes</p>
+          <p className="text-gray-400">Agrega participantes para comenzar el torneo</p>
           <div className="flex justify-center space-x-4 mt-4">
             <Button onClick={() => setIsCsvImportOpen(true)} variant="outline">
-              <Import className="mr-2 h-4 w-4" /> Import CSV
+              <Import className="mr-2 h-4 w-4" /> Importar CSV
             </Button>
             <Button onClick={handleAddClick}>
-              <Plus className="mr-2 h-4 w-4" /> Add Participant
+              <Plus className="mr-2 h-4 w-4" /> Agregar Participante
             </Button>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function ParticipantsPage() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingParticipant ? 'Edit Participant' : 'Add New Participant'}
+              {editingParticipant ? 'Editar Participante' : 'Agregar Nuevo Participante'}
             </DialogTitle>
           </DialogHeader>
           <ParticipantForm
@@ -206,26 +206,26 @@ export default function ParticipantsPage() {
       <Dialog open={isCsvImportOpen} onOpenChange={setIsCsvImportOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Participants from CSV</DialogTitle>
+            <DialogTitle>Importar Participantes desde CSV</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <p className="text-sm text-gray-600">
-              Enter participant data in CSV format (one per line):
+              Ingresa los datos de los participantes en formato CSV (uno por línea):
               <br />
-              <code className="bg-gray-100 p-1 rounded">Name, Title, Pokemon1, Pokemon2, ...</code>
+              <code className="bg-gray-100 p-1 rounded">Nombre, Título, Pokemon1, Pokemon2, ...</code>
             </p>
             
             <div className="space-y-2">
               <Textarea
                 value={csvData}
                 onChange={(e) => setCsvData(e.target.value)}
-                placeholder="John Doe, Master Chef, Charizard, Blastoise, Venusaur"
+                placeholder="Juan Pérez, Maestro Chef, Charizard, Blastoise, Venusaur"
                 rows={10}
                 className="font-mono"
               />
               <p className="text-xs text-gray-500">
-                Example: <code>John Doe, Master Chef, Charizard, Blastoise, Venusaur</code>
+                Ejemplo: <code>Juan Pérez, Maestro Chef, Charizard, Blastoise, Venusaur</code>
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -236,15 +236,15 @@ export default function ParticipantsPage() {
                 onChange={(e) => setImportCompleteList(e.target.checked)}
               />
               <label htmlFor="import-complete-list" className="text-sm">
-                Import as complete list (delete all existing participants before import)
+                Importar como lista completa (eliminar todos los participantes existentes antes de importar)
               </label>
             </div>
           </div>
           
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsCsvImportOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsCsvImportOpen(false)}>Cancelar</Button>
             <Button onClick={handleImportCsv} disabled={isImporting || !csvData.trim()}>
-              {isImporting ? "Importing..." : "Import Participants"}
+              {isImporting ? "Importando..." : "Importar Participantes"}
             </Button>
           </div>
         </DialogContent>

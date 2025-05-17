@@ -1,4 +1,3 @@
-
 import { useAppContext } from '../context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -17,31 +16,31 @@ export default function StandingsPage() {
   
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Tournament Standings</h2>
+      <h2 className="text-2xl font-bold">Clasificación del Torneo</h2>
       
       {tournament.currentRound === 0 ? (
         <div className="text-center py-10">
-          <p className="text-lg text-gray-500">Tournament hasn't started yet</p>
-          <p className="text-gray-400">Start the tournament to see standings</p>
+          <p className="text-lg text-gray-500">El torneo aún no ha comenzado</p>
+          <p className="text-gray-400">Inicia el torneo para ver la clasificación</p>
         </div>
       ) : standings.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-lg text-gray-500">No standings available</p>
+          <p className="text-lg text-gray-500">No hay clasificación disponible</p>
         </div>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Current Rankings</CardTitle>
+            <CardTitle>Clasificación Actual</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">#</TableHead>
-                  <TableHead>Trainer</TableHead>
+                  <TableHead>Entrenador</TableHead>
                   <TableHead className="text-center">Pokémon</TableHead>
-                  <TableHead className="text-center">Points</TableHead>
-                  <TableHead className="text-center">Resistance</TableHead>
+                  <TableHead className="text-center">Puntos</TableHead>
+                  <TableHead className="text-center">Resistencia</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -70,7 +69,7 @@ export default function StandingsPage() {
                         ))}
                         {participant.team.length > 3 && (
                           <span className="text-xs text-gray-500 self-center">
-                            +{participant.team.length - 3} more
+                            +{participant.team.length - 3} más
                           </span>
                         )}
                       </div>
@@ -87,24 +86,23 @@ export default function StandingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Scoring System</CardTitle>
+          <CardTitle>Sistema de Puntuación</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="text-lg font-medium mb-2">Points</h4>
+              <h4 className="text-lg font-medium mb-2">Puntos</h4>
               <ul className="list-disc list-inside space-y-1">
-                <li>Win: 2 points</li>
-                <li>Tie: 1 point</li>
-                <li>Bye: 1 point</li>
-                <li>Loss: 0 points</li>
+                <li>Victoria: 2 puntos</li>
+                <li>Empate: 1 punto</li>
+                <li>Bye: 1 punto</li>
+                <li>Derrota: 0 puntos</li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-medium mb-2">Resistance</h4>
+              <h4 className="text-lg font-medium mb-2">Resistencia</h4>
               <p className="text-sm text-gray-600">
-                A participant's resistance is calculated as the sum of points earned by all of their opponents throughout the tournament.
-                Higher resistance indicates facing stronger opponents.
+                La resistencia de un participante se calcula como la suma de los puntos obtenidos por todos sus oponentes durante el torneo. Una mayor resistencia indica que se han enfrentado a oponentes más fuertes.
               </p>
             </div>
           </div>

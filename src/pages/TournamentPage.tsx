@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import MatchCard from '../components/MatchCard';
@@ -46,12 +45,12 @@ export default function TournamentPage() {
   
   const handleStartTournament = () => {
     if (participants.length < 2) {
-      toast.error('You need at least 2 participants to start a tournament');
+      toast.error('Necesitas al menos 2 participantes para iniciar un torneo');
       return;
     }
     
     startTournament();
-    toast.success('Tournament started successfully');
+    toast.success('Torneo iniciado correctamente');
   };
   
   const handleRoundsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +72,7 @@ export default function TournamentPage() {
 
   const handleAddMatch = () => {
     if (!participant1Id) {
-      toast.error('Please select the first participant');
+      toast.error('Por favor, selecciona el primer participante');
       return;
     }
 
@@ -82,13 +81,13 @@ export default function TournamentPage() {
     setIsMatchDialogOpen(false);
     setParticipant1Id('');
     setParticipant2Id('');
-    toast.success('Match added successfully');
+    toast.success('Combate agregado correctamente');
   };
 
   const handleRemoveMatch = (matchId: string) => {
-    if (confirm('Are you sure you want to remove this match?')) {
+    if (confirm('¿Estás seguro de que deseas eliminar este combate?')) {
       removeMatch(matchId);
-      toast.success('Match removed successfully');
+      toast.success('Combate eliminado correctamente');
     }
   };
 
@@ -110,13 +109,13 @@ export default function TournamentPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Tournament Management</h2>
+      <h2 className="text-2xl font-bold">Gestión del Torneo</h2>
       
       <Card>
         <CardHeader>
-          <CardTitle>Tournament Settings</CardTitle>
+          <CardTitle>Configuración del Torneo</CardTitle>
           <CardDescription>
-            Configure the tournament parameters before starting
+            Configura los parámetros del torneo antes de comenzar
           </CardDescription>
         </CardHeader>
         
@@ -124,7 +123,7 @@ export default function TournamentPage() {
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="w-full md:w-1/2">
-                <Label htmlFor="rounds">Number of Rounds</Label>
+                <Label htmlFor="rounds">Número de Rondas</Label>
                 <Input
                   id="rounds"
                   type="number"
@@ -136,19 +135,19 @@ export default function TournamentPage() {
               </div>
               
               <div className="w-full md:w-1/2">
-                <Label>Participants</Label>
+                <Label>Participantes</Label>
                 <div className="mt-1 p-2 bg-gray-50 rounded border">
-                  <span className="font-medium">{participants.length}</span> participants registered
+                  <span className="font-medium">{participants.length}</span> participantes registrados
                 </div>
               </div>
             </div>
             
             <div>
-              <Label>Tournament Status</Label>
+              <Label>Estado del Torneo</Label>
               <div className="mt-1 p-2 bg-gray-50 rounded border">
                 {tournament.currentRound === 0 
-                  ? "Not started" 
-                  : `Round ${tournament.currentRound} of ${tournament.rounds}`}
+                  ? "No iniciado" 
+                  : `Ronda ${tournament.currentRound} de ${tournament.rounds}`}
               </div>
             </div>
           </div>
@@ -159,13 +158,13 @@ export default function TournamentPage() {
             onClick={handleStartTournament}
             disabled={participants.length < 2}
           >
-            {tournament.currentRound === 0 ? "Start Tournament" : "Restart Tournament"}
+            {tournament.currentRound === 0 ? "Iniciar Torneo" : "Reiniciar Torneo"}
           </Button>
         </CardFooter>
       </Card>
       
       <div className="space-y-8">
-        <h3 className="text-xl font-bold">Tournament Rounds</h3>
+        <h3 className="text-xl font-bold">Rondas del Torneo</h3>
         
         {Array.from({ length: tournament.rounds || 4 }).map((_, index) => {
           const roundNumber = index + 1;
@@ -177,31 +176,32 @@ export default function TournamentPage() {
             <Card key={roundNumber} className={`${roundColor} border-2 ${roundActive ? 'border-pokemon-red' : 'border-gray-200'}`}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <CardTitle>Round {roundNumber}</CardTitle>
+                  <CardTitle>Ronda {roundNumber}</CardTitle>
                   <Button 
                     onClick={() => openAddMatchDialog(roundNumber)}
                     size="sm"
                     variant="outline"
                     className="bg-white hover:bg-gray-100"
                   >
-                    <Plus className="h-4 w-4 mr-2" /> Add Match
+                    <Plus className="h-4 w-4 mr-2" /> Agregar Combate
                   </Button>
                 </div>
                 <CardDescription>
-                  {roundActive ? 'Active round' : 'Upcoming round'} • {roundMatches.length} matches
+                  {roundActive ? 'Ronda activa' : 'Próxima ronda'} • {roundMatches.length} combates
                 </CardDescription>
               </CardHeader>
               
               <CardContent>
                 {roundMatches.length === 0 ? (
                   <div className="text-center py-8 bg-white/50 rounded-md">
-                    <p className="text-gray-500">No matches for this round yet</p>
+                    <p className="text-gray-500">Aún no hay combates para esta ronda</p>
                     <Button 
                       onClick={() => openAddMatchDialog(roundNumber)}
+                      size="sm"
                       variant="outline"
-                      className="mt-4 bg-white hover:bg-gray-100"
+                      className="bg-white hover:bg-gray-100"
                     >
-                      <Plus className="h-4 w-4 mr-2" /> Create First Match
+                      <Plus className="h-4 w-4 mr-2" /> Agregar Combate
                     </Button>
                   </div>
                 ) : (
@@ -230,12 +230,12 @@ export default function TournamentPage() {
       <Dialog open={isMatchDialogOpen} onOpenChange={setIsMatchDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Custom Match for Round {selectedRoundForMatch}</DialogTitle>
+            <DialogTitle>Agregar Combate para Ronda {selectedRoundForMatch}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="participant1">Participant 1 (Required)</Label>
+              <Label htmlFor="participant1">Participante 1 (Requerido)</Label>
               <Select 
                 value={participant1Id} 
                 onValueChange={(value) => {
@@ -247,7 +247,7 @@ export default function TournamentPage() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select participant 1" />
+                  <SelectValue placeholder="Selecciona participante 1" />
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableParticipantsForRound(selectedRoundForMatch).map((p) => (
@@ -260,13 +260,13 @@ export default function TournamentPage() {
             </div>
             
             <div>
-              <Label htmlFor="participant2">Participant 2 (Optional, leave empty for BYE)</Label>
+              <Label htmlFor="participant2">Participante 2 (Opcional, dejar vacío para BYE)</Label>
               <Select 
                 value={participant2Id} 
                 onValueChange={setParticipant2Id}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select participant 2 (optional)" />
+                  <SelectValue placeholder="Selecciona participante 2 (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableParticipantsForRound(selectedRoundForMatch, participant1Id)
@@ -289,7 +289,7 @@ export default function TournamentPage() {
               </Select>
               {participant1Id && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Note: Participants in red have already fought against this opponent in previous rounds.
+                  Nota: Los participantes en rojo ya se han enfrentado a este oponente en rondas anteriores.
                 </p>
               )}
             </div>
@@ -297,10 +297,10 @@ export default function TournamentPage() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
-              Cancel
+              Cancelar
             </Button>
             <Button onClick={handleAddMatch}>
-              Add Match
+              Agregar Combate
             </Button>
           </DialogFooter>
         </DialogContent>

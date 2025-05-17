@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Pokemon } from '../types';
 import { searchPokemon } from '../services/pokemonService';
@@ -56,7 +55,7 @@ export default function PokemonSearch({ onSelect, excludeIds = [] }: PokemonSear
       <div className="relative">
         <Input
           type="text"
-          placeholder="Search Pokémon by name or number..."
+          placeholder="Buscar Pokémon por nombre o número..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full px-4 py-2"

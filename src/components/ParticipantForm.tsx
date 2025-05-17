@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Participant, Pokemon } from '../types';
@@ -49,7 +48,7 @@ export default function ParticipantForm({
 
   const handleCsvImport = async () => {
     if (!csvInput.trim()) {
-      toast.error("Please enter Pokémon names");
+      toast.error("Por favor, ingrese los nombres de los Pokémon");
       return;
     }
 
@@ -59,7 +58,7 @@ export default function ParticipantForm({
       const pokemonNames = csvInput.split(',').map(name => name.trim()).filter(name => name);
       
       if (pokemonNames.length === 0) {
-        toast.error("No valid Pokémon names found");
+        toast.error("No se encontraron nombres de Pokémon válidos");
         setIsProcessing(false);
         return;
       }
@@ -68,7 +67,7 @@ export default function ParticipantForm({
       const availableSlots = maxTeamSize - team.length;
       
       if (pokemonNames.length > availableSlots) {
-        toast.warning(`Only adding ${availableSlots} of ${pokemonNames.length} Pokémon (team size limit is 6)`);
+        toast.warning(`Solo se agregarán ${availableSlots} de ${pokemonNames.length} Pokémon (el límite de tamaño de equipo es 6)`);
       }
 
       const pokemonToAdd = pokemonNames.slice(0, availableSlots);
@@ -84,19 +83,19 @@ export default function ParticipantForm({
       }
 
       if (newPokemon.length === 0) {
-        toast.error("No matching Pokémon found");
+        toast.error("No se encontraron Pokémon coincidentes");
       } else if (newPokemon.length < pokemonToAdd.length) {
-        toast.warning(`Added ${newPokemon.length} of ${pokemonToAdd.length} Pokémon (some names were not found)`);
+        toast.warning(`Se agregaron ${newPokemon.length} de ${pokemonToAdd.length} Pokémon (algunos nombres no se encontraron)`);
         setTeam([...team, ...newPokemon]);
       } else {
-        toast.success(`Added ${newPokemon.length} Pokémon to the team`);
+        toast.success(`Se agregaron ${newPokemon.length} Pokémon al equipo`);
         setTeam([...team, ...newPokemon]);
       }
       
       setCsvInput('');
     } catch (error) {
-      console.error("Error importing Pokémon:", error);
-      toast.error("Failed to import Pokémon");
+      console.error("Error al importar Pokémon:", error);
+      toast.error("No se pudo importar Pokémon");
     } finally {
       setIsProcessing(false);
     }
@@ -104,7 +103,7 @@ export default function ParticipantForm({
 
   const onFormSubmit = handleSubmit((data) => {
     if (team.length < 1) {
-      toast.error('Please select at least one Pokémon for the team.');
+      toast.error('Por favor, seleccione al menos un Pokémon para el equipo.');
       return;
     }
 
@@ -125,11 +124,11 @@ export default function ParticipantForm({
     <form onSubmit={onFormSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label htmlFor="name">Trainer Name</Label>
+          <Label htmlFor="name">Nombre del Entrenador</Label>
           <Input
             id="name"
-            {...register('name', { required: 'Trainer name is required' })}
-            placeholder="Enter trainer name"
+            {...register('name', { required: 'El nombre del entrenador es obligatorio' })}
+            placeholder="Ingresa el nombre del entrenador"
             className="mt-1"
           />
           {errors.name && (
@@ -138,11 +137,11 @@ export default function ParticipantForm({
         </div>
 
         <div>
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Título</Label>
           <Input
             id="title"
-            {...register('title', { required: 'Title is required' })}
-            placeholder="e.g. Master Chef, Dragon Tamer, etc."
+            {...register('title', { required: 'El título es obligatorio' })}
+            placeholder="Ej: Maestro Chef, Domador de Dragones, etc."
             className="mt-1"
           />
           {errors.title && (
@@ -152,13 +151,13 @@ export default function ParticipantForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="csvInput">Quick Add Pokémon (CSV)</Label>
+        <Label htmlFor="csvInput">Agregar Pokémon Rápidamente (CSV)</Label>
         <div className="flex gap-2">
           <Textarea
             id="csvInput"
             value={csvInput}
             onChange={(e) => setCsvInput(e.target.value)}
-            placeholder="Enter Pokémon names separated by commas (e.g. Pikachu, Charizard, Bulbasaur)"
+            placeholder="Ingresa los nombres de los Pokémon separados por comas (ej: Pikachu, Charizard, Bulbasaur)"
             className="flex-1"
           />
           <Button 
@@ -167,11 +166,11 @@ export default function ParticipantForm({
             disabled={isProcessing || !csvInput.trim() || team.length >= 6}
             className="self-start"
           >
-            {isProcessing ? "Adding..." : "Add"}
+            {isProcessing ? "Agregando..." : "Agregar"}
           </Button>
         </div>
         <p className="text-xs text-gray-500">
-          Add multiple Pokémon at once by entering names separated by commas
+          Agrega varios Pokémon a la vez ingresando los nombres separados por comas
         </p>
       </div>
 
@@ -183,10 +182,10 @@ export default function ParticipantForm({
 
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit">
-          {participant ? 'Update' : 'Create'} Participant
+          {participant ? 'Actualizar' : 'Crear'} Participante
         </Button>
       </div>
     </form>

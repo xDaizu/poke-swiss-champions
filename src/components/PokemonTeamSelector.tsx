@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Pokemon } from '../types';
 import PokemonSearch from './PokemonSearch';
@@ -32,14 +31,14 @@ export default function PokemonTeamSelector({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="font-bold text-lg">Pokémon Team ({team.length}/{maxTeamSize})</h3>
+        <h3 className="font-bold text-lg">Equipo Pokémon ({team.length}/{maxTeamSize})</h3>
         {team.length > 0 && (
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => onChange([])}
           >
-            Clear Team
+            Limpiar Equipo
           </Button>
         )}
       </div>
@@ -81,7 +80,7 @@ export default function PokemonTeamSelector({
             key={`empty-${index}`}
             className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-24"
           >
-            <span className="text-gray-400 text-xs">Empty Slot</span>
+            <span className="text-gray-400 text-xs">Espacio Vacío</span>
           </div>
         ))}
       </div>

@@ -214,3 +214,42 @@
 .animate-fadeInRight {
   animation: fadeInRight 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Battle exit animations */
+@keyframes exitLeftCard {
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-5vh) translateX(-5vw);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20vh) translateX(-20vw);
+  }
+}
+
+@keyframes exitRightCard {
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-5vh) translateX(5vw);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20vh) translateX(20vw);
+  }
+}
+
+.animate-exitLeftCard {
+  animation: exitLeftCard 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-exitRightCard {
+  animation: exitRightCard 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

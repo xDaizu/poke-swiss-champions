@@ -20,19 +20,19 @@ export default function TournamentPublicPage() {
     const p1 = getParticipant(match.participant1Id);
     const p2 = getParticipant(match.participant2Id);
     return (
-      <div className="fixed inset-0 z-50 flex flex-col min-h-screen bg-black/70">
+      <div className={`fixed inset-0 z-50 flex flex-col min-h-screen bg-black/70 transition-opacity duration-1000 ${battleAnimatingOut ? 'opacity-0' : 'opacity-100'}`}>
         {/* Battle cards container - positioned at exactly 1/4 of screen height */}
         <div className="relative w-full flex-1">
           {/* Left card */}
           <div
-            className={`fixed transition-transform duration-700 ${battleAnimatingOut ? '-translate-x-full opacity-0' : ''}`}
+            className={`fixed ${battleAnimatingOut ? 'animate-exitLeftCard' : ''}`}
             style={{ zIndex: 2, top: '25vh', left: '15%' }}
           >
             <BattleCard participant={p1} align="left" />
           </div>
           {/* Right card */}
           <div
-            className={`fixed transition-transform duration-700 ${battleAnimatingOut ? 'translate-x-full opacity-0' : ''}`}
+            className={`fixed ${battleAnimatingOut ? 'animate-exitRightCard' : ''}`}
             style={{ zIndex: 2, top: '25vh', right: '15%' }}
           >
             <BattleCard participant={p2} align="right" />
@@ -40,13 +40,13 @@ export default function TournamentPublicPage() {
         </div>
         <div className="flex justify-center pb-8">
           <button
-            className="mt-4 bg-white rounded-full shadow-lg p-3 flex items-center justify-center hover:bg-gray-200 transition-colors fixed bottom-4"
+            className={`mt-4 bg-white rounded-full shadow-lg p-3 flex items-center justify-center hover:bg-gray-200 transition-all duration-500 fixed bottom-4 ${battleAnimatingOut ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}
             onClick={() => {
               setBattleAnimatingOut(true);
               setTimeout(() => {
                 setBattleMatch(null);
                 setBattleAnimatingOut(false);
-              }, 700);
+              }, 1000);
               if (onClose) onClose();
             }}
             aria-label="Cerrar batalla"

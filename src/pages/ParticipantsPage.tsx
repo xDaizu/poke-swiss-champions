@@ -7,12 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash } from 'lucide-react';
+import { Plus, Edit, Trash, Import } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function ParticipantsPage() {
-  const { participants, addParticipant, editParticipant, removeParticipant } = useAppContext();
+  const { participants, addParticipant, editParticipant, removeParticipant, addParticipantsFromCsv } = useAppContext();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingParticipant, setEditingParticipant] = useState<Participant | undefined>(undefined);
+  const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
+  const [csvData, setCsvData] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleAddClick = () => {
     setEditingParticipant(undefined);
@@ -46,22 +50,56 @@ export default function ParticipantsPage() {
     setIsFormOpen(false);
   };
 
+  const handleImportCsv = async () => {
+    if (!csvData.trim()) {
+      toast.error('Please enter CSV data');
+      return;
+    }
+    
+    setIsImporting(true);
+    try {
+      const count = await addParticipantsFromCsv(csvData);
+      if (count > 0) {
+        toast.success(`Successfully imported ${count} participants`);
+        setCsvData('');
+        setIsCsvImportOpen(false);
+      } else {
+        toast.error('No valid participants found in CSV data');
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast.error('Failed to import participants');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Tournament Participants</h2>
-        <Button onClick={handleAddClick}>
-          <Plus className="mr-2 h-4 w-4" /> Add Participant
-        </Button>
+        <div className="space-x-2">
+          <Button onClick={() => setIsCsvImportOpen(true)} variant="outline">
+            <Import className="mr-2 h-4 w-4" /> Import CSV
+          </Button>
+          <Button onClick={handleAddClick}>
+            <Plus className="mr-2 h-4 w-4" /> Add Participant
+          </Button>
+        </div>
       </div>
 
       {participants.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-lg text-gray-500">No participants yet</p>
           <p className="text-gray-400">Add participants to start the tournament</p>
-          <Button onClick={handleAddClick} className="mt-4">
-            <Plus className="mr-2 h-4 w-4" /> Add Participant
-          </Button>
+          <div className="flex justify-center space-x-4 mt-4">
+            <Button onClick={() => setIsCsvImportOpen(true)} variant="outline">
+              <Import className="mr-2 h-4 w-4" /> Import CSV
+            </Button>
+            <Button onClick={handleAddClick}>
+              <Plus className="mr-2 h-4 w-4" /> Add Participant
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -117,6 +155,42 @@ export default function ParticipantsPage() {
             onSubmit={handleFormSubmit}
             onCancel={handleFormCancel}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCsvImportOpen} onOpenChange={setIsCsvImportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Participants from CSV</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600">
+              Enter participant data in CSV format (one per line):
+              <br />
+              <code className="bg-gray-100 p-1 rounded">Name, Title, Pokemon1, Pokemon2, ...</code>
+            </p>
+            
+            <div className="space-y-2">
+              <Textarea
+                value={csvData}
+                onChange={(e) => setCsvData(e.target.value)}
+                placeholder="John Doe, Master Chef, Charizard, Blastoise, Venusaur"
+                rows={10}
+                className="font-mono"
+              />
+              <p className="text-xs text-gray-500">
+                Example: <code>John Doe, Master Chef, Charizard, Blastoise, Venusaur</code>
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsCsvImportOpen(false)}>Cancel</Button>
+            <Button onClick={handleImportCsv} disabled={isImporting || !csvData.trim()}>
+              {isImporting ? "Importing..." : "Import Participants"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

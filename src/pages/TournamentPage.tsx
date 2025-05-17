@@ -14,18 +14,26 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit, Plus, X } from 'lucide-react';
+import { Participant } from '../types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function TournamentPage() {
   const { 
     participants, 
     tournament, 
     setRounds, 
-    startTournament 
+    startTournament,
+    createCustomMatch,
+    removeMatch
   } = useAppContext();
   
   const [customRounds, setCustomRounds] = useState(tournament.rounds.toString());
   const [currentRoundView, setCurrentRoundView] = useState(tournament.currentRound || 1);
+  const [isMatchDialogOpen, setIsMatchDialogOpen] = useState(false);
+  const [participant1Id, setParticipant1Id] = useState<string>('');
+  const [participant2Id, setParticipant2Id] = useState<string>('');
   
   const handleStartTournament = () => {
     if (participants.length < 2) {
@@ -61,6 +69,27 @@ export default function TournamentPage() {
   const handleNextRound = () => {
     if (canNavigateToNextRound) {
       setCurrentRoundView(currentRoundView + 1);
+    }
+  };
+
+  const handleAddMatch = () => {
+    if (!participant1Id) {
+      toast.error('Please select the first participant');
+      return;
+    }
+
+    // Validate participant selection
+    createCustomMatch(currentRoundView, participant1Id, participant2Id || null);
+    setIsMatchDialogOpen(false);
+    setParticipant1Id('');
+    setParticipant2Id('');
+    toast.success('Match added successfully');
+  };
+
+  const handleRemoveMatch = (matchId: string) => {
+    if (confirm('Are you sure you want to remove this match?')) {
+      removeMatch(matchId);
+      toast.success('Match removed successfully');
     }
   };
 
@@ -152,17 +181,102 @@ export default function TournamentPage() {
             </div>
           </div>
           
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">Customize matches for this round</p>
+            <Button 
+              onClick={() => setIsMatchDialogOpen(true)}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Custom Match
+            </Button>
+          </div>
+          
           {currentRoundMatches.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500">No matches for this round</p>
+              <Button 
+                onClick={() => setIsMatchDialogOpen(true)}
+                className="mt-4"
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Match
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {currentRoundMatches.map(match => (
-                <MatchCard key={match.id} match={match} />
+                <div key={match.id} className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-gray-200 hover:bg-gray-300 p-1"
+                    onClick={() => handleRemoveMatch(match.id)}
+                  >
+                    <X size={12} />
+                  </Button>
+                  <MatchCard key={match.id} match={match} />
+                </div>
               ))}
             </div>
           )}
+          
+          <Dialog open={isMatchDialogOpen} onOpenChange={setIsMatchDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Custom Match for Round {currentRoundView}</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="participant1">Participant 1 (Required)</Label>
+                  <Select 
+                    value={participant1Id} 
+                    onValueChange={setParticipant1Id}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select participant 1" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {participants.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name} ({p.title})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="participant2">Participant 2 (Optional, leave empty for BYE)</Label>
+                  <Select 
+                    value={participant2Id} 
+                    onValueChange={setParticipant2Id}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select participant 2 (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {participants
+                        .filter(p => p.id !== participant1Id)
+                        .map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name} ({p.title})
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddMatch}>
+                  Add Match
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
     </div>

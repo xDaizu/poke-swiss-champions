@@ -15,6 +15,9 @@ interface AppContextType {
   getParticipantScore: (id: string) => { points: number, resistance: number };
   getStandings: () => { participant: Participant, points: number, resistance: number }[];
   isMatchReady: (match: Match) => boolean;
+  createCustomMatch: (round: number, participant1Id: string, participant2Id: string | null) => void;
+  removeMatch: (matchId: string) => void;
+  addParticipantsFromCsv: (csvData: string) => Promise<number>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -85,6 +88,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getParticipantById = (id: string | null) => {
     if (!id) return undefined;
     return participants.find(p => p.id === id);
+  };
+
+  // CSV Participant Import
+  const addParticipantsFromCsv = async (csvData: string): Promise<number> => {
+    if (!csvData.trim()) return 0;
+
+    const lines = csvData.split('\n').filter(line => line.trim());
+    const newParticipants: Participant[] = [];
+    
+    for (const line of lines) {
+      try {
+        // Format: Name, Title, Pokemon1, Pokemon2, ... 
+        const parts = line.split(',').map(p => p.trim());
+        if (parts.length < 3) continue; // Need at least name, title, and one pokemon
+        
+        const name = parts[0];
+        const title = parts[1];
+        const pokemonNames = parts.slice(2).filter(p => p);
+        
+        // Import pokemon from the service
+        const pokemonTeam = [];
+        for (const pokemonName of pokemonNames.slice(0, 6)) { // Max 6
+          try {
+            const { searchPokemon } = await import('../services/pokemonService');
+            const results = await searchPokemon(pokemonName);
+            if (results.length > 0) {
+              pokemonTeam.push(results[0]);
+            }
+          } catch (error) {
+            console.error(`Error adding pokemon ${pokemonName}:`, error);
+          }
+        }
+        
+        if (pokemonTeam.length > 0) {
+          newParticipants.push({
+            id: crypto.randomUUID(),
+            name,
+            title,
+            team: pokemonTeam
+          });
+        }
+      } catch (error) {
+        console.error('Error parsing line:', line, error);
+      }
+    }
+    
+    if (newParticipants.length > 0) {
+      setParticipants(prev => [...prev, ...newParticipants]);
+    }
+    
+    return newParticipants.length;
   };
 
   // Tournament Management
@@ -170,6 +224,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
+  // Custom Match Management
+  const createCustomMatch = (round: number, participant1Id: string, participant2Id: string | null) => {
+    const newMatch: Match = {
+      id: `match-custom-${Date.now()}`,
+      round,
+      participant1Id,
+      participant2Id,
+      result: participant2Id ? null : 'bye' // If no participant2, it's a bye
+    };
+    
+    setTournament(prev => ({
+      ...prev,
+      currentRound: Math.max(prev.currentRound, round),
+      matches: [...prev.matches, newMatch]
+    }));
+  };
+
+  const removeMatch = (matchId: string) => {
+    setTournament(prev => ({
+      ...prev,
+      matches: prev.matches.filter(m => m.id !== matchId)
+    }));
+  };
+
   // Helper functions
   const havePlayed = (id1: string, id2: string) => {
     return tournament.matches.some(
@@ -252,7 +330,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     getParticipantById,
     getParticipantScore,
     getStandings,
-    isMatchReady
+    isMatchReady,
+    createCustomMatch,
+    removeMatch,
+    addParticipantsFromCsv
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

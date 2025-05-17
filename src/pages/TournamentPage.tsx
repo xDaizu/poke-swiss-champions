@@ -35,7 +35,8 @@ export default function TournamentPage() {
     createCustomMatch,
     removeMatch,
     havePlayed,
-    getStandings
+    getStandings,
+    getCurrentRound
   } = useAppContext();
   
   const [customRounds, setCustomRounds] = useState(tournament.rounds.toString());
@@ -136,54 +137,49 @@ export default function TournamentPage() {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Gestión del Torneo</h2>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuración del Torneo</CardTitle>
-          <CardDescription>
+      <Card className="!p-2">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Configuración del Torneo</CardTitle>
+          <CardDescription className="text-xs">
             Configura los parámetros del torneo antes de comenzar
           </CardDescription>
         </CardHeader>
-        
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="w-full md:w-1/2">
-                <Label htmlFor="rounds">Número de Rondas</Label>
-                <Input
-                  id="rounds"
-                  type="number"
-                  min="1"
-                  value={customRounds}
-                  onChange={handleRoundsChange}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div className="w-full md:w-1/2">
-                <Label>Participantes</Label>
-                <div className="mt-1 p-2 bg-gray-50 rounded border">
-                  <span className="font-medium">{participants.length}</span> participantes registrados
-                </div>
+        <CardContent className="space-y-2">
+          <div className="flex flex-row items-center gap-2 overflow-x-auto">
+            <div className="w-1/3 min-w-0">
+              <Label htmlFor="rounds" className="text-xs">Número de Rondas</Label>
+              <Input
+                id="rounds"
+                type="number"
+                min="1"
+                value={customRounds}
+                onChange={handleRoundsChange}
+                className="mt-1 text-xs py-1 px-2 h-8"
+              />
+            </div>
+            <div className="w-1/3 min-w-0">
+              <Label className="text-xs">Participantes</Label>
+              <div className="mt-1 p-1 bg-gray-50 rounded border text-xs">
+                <span className="font-medium">{participants.length}</span> participantes registrados
               </div>
             </div>
-            
-            <div>
-              <Label>Estado del Torneo</Label>
-              <div className="mt-1 p-2 bg-gray-50 rounded border">
-                {tournament.currentRound === 0 
-                  ? "No iniciado" 
-                  : `Ronda ${tournament.currentRound} de ${tournament.rounds}`}
+            <div className="w-1/3 min-w-0">
+              <Label className="text-xs">Estado del Torneo</Label>
+              <div className="mt-1 p-1 bg-gray-50 rounded border text-xs">
+                {getCurrentRound() === 0
+                  ? "No iniciado"
+                  : `Rondas completas: ${getCurrentRound()} de ${tournament.rounds}`}
               </div>
             </div>
           </div>
         </CardContent>
-        
-        <CardFooter>
+        <CardFooter className="pt-2">
           <Button 
             onClick={handleStartTournament}
             disabled={participants.length < 2}
+            size="sm"
           >
-            {tournament.currentRound === 0 ? "Iniciar Torneo" : "Reiniciar Torneo"}
+            {getCurrentRound() === 0 ? "Iniciar Torneo" : "Reiniciar Torneo"}
           </Button>
         </CardFooter>
       </Card>
@@ -194,7 +190,7 @@ export default function TournamentPage() {
         {Array.from({ length: tournament.rounds || 4 }).map((_, index) => {
           const roundNumber = index + 1;
           const roundMatches = tournament.matches.filter(m => m.round === roundNumber);
-          const roundActive = tournament.currentRound >= roundNumber;
+          const roundActive = getCurrentRound() >= roundNumber;
           const roundColor = ROUND_COLORS[index % ROUND_COLORS.length];
           
           return (

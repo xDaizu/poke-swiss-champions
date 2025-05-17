@@ -12,13 +12,14 @@ interface AppContextType {
   startTournament: () => void;
   updateMatchResult: (matchId: string, result: MatchResult) => void;
   getParticipantById: (id: string | null) => Participant | undefined;
-  getParticipantScore: (id: string) => { points: number, resistance: number };
-  getStandings: () => { participant: Participant, points: number, resistance: number }[];
+  getParticipantScore: (id: string, maxRound?: number) => { points: number, resistance: number };
+  getStandings: (maxRound?: number) => { participant: Participant, points: number, resistance: number }[];
   isMatchReady: (match: Match) => boolean;
   createCustomMatch: (round: number, participant1Id: string, participant2Id: string | null) => void;
   removeMatch: (matchId: string) => void;
   addParticipantsFromCsv: (csvData: string) => Promise<number>;
   havePlayed: (id1: string, id2: string) => boolean;
+  getCurrentRound: () => number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -184,8 +185,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const startTournament = () => {
     setTournament(prev => ({
-      ...prev,
-      currentRound: 0,
+      rounds: prev.rounds,
+      currentRound: 0, // will be ignored, kept for legacy
       matches: []
     }));
     // No automatic match generation
@@ -203,13 +204,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Custom Match Management
   const createCustomMatch = (round: number, participant1Id: string, participant2Id: string | null) => {
     const newMatch: Match = {
-      id: `match-custom-${Date.now()}`,
+      id: crypto.randomUUID(),
       round,
       participant1Id,
       participant2Id,
       result: participant2Id ? null : 'bye' // If no participant2, it's a bye
     };
-    
     setTournament(prev => ({
       ...prev,
       currentRound: Math.max(prev.currentRound, round),
@@ -239,11 +239,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const getParticipantScore = (id: string) => {
+  const getParticipantScore = (id: string, maxRound?: number) => {
     let points = 0;
     let opponents: string[] = [];
-    
     tournament.matches.forEach(match => {
+      if (maxRound !== undefined && match.round > maxRound) return;
       if (match.participant1Id === id) {
         if (match.result === 'win1') points += 2;
         if (match.result === 'tie' || match.result === 'bye') points += 1;
@@ -254,13 +254,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (match.participant1Id) opponents.push(match.participant1Id);
       }
     });
-    
     // Calculate resistance (sum of opponents' points)
     let resistance = 0;
     opponents.forEach(opponentId => {
       let opponentPoints = 0;
-      
       tournament.matches.forEach(match => {
+        if (maxRound !== undefined && match.round > maxRound) return;
         if (match.participant1Id === opponentId) {
           if (match.result === 'win1') opponentPoints += 2;
           if (match.result === 'tie' || match.result === 'bye') opponentPoints += 1;
@@ -269,19 +268,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (match.result === 'tie') opponentPoints += 1;
         }
       });
-      
       resistance += opponentPoints;
     });
-    
     return { points, resistance };
   };
 
-  const getStandings = () => {
+  const getStandings = (maxRound?: number) => {
     const standings = participants.map(participant => {
-      const { points, resistance } = getParticipantScore(participant.id);
+      const { points, resistance } = getParticipantScore(participant.id, maxRound);
       return { participant, points, resistance };
     });
-    
     // Sort by points, then by resistance
     return standings.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
@@ -292,6 +288,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isMatchReady = (match: Match) => {
     return match.participant1Id !== null && 
            (match.participant2Id !== null || match.result === 'bye');
+  };
+
+  // Helper: get the number of rounds that are complete (all matches in that round have a result)
+  const getCurrentRound = () => {
+    let complete = 0;
+    for (let r = 1; r <= tournament.rounds; r++) {
+      const matches = tournament.matches.filter(m => m.round === r);
+      if (matches.length > 0 && matches.every(m => m.result)) {
+        complete++;
+      } else {
+        break;
+      }
+    }
+    return complete;
   };
 
   const value = {
@@ -310,7 +320,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     createCustomMatch,
     removeMatch,
     addParticipantsFromCsv,
-    havePlayed
+    havePlayed,
+    getCurrentRound
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

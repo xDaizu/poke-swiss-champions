@@ -34,14 +34,24 @@ export default function MatchCard({ match }: MatchCardProps) {
     }
   };
 
+  // Determine card background gradient based on result
+  let cardBg = '';
+  if (match.result === 'win1') {
+    cardBg = 'bg-gradient-to-r from-green-200 via-white to-white';
+  } else if (match.result === 'win2') {
+    cardBg = 'bg-gradient-to-l from-green-200 via-white to-white';
+  } else if (match.result === 'tie') {
+    cardBg = 'bg-gradient-to-r from-white via-yellow-200 to-white';
+  }
+
   return (
-    <Card className="pokemon-card w-full">
-      <CardHeader className="pb-2 text-center">
+    <Card className={`pokemon-card w-full ${cardBg}`}>
+      {/* <CardHeader className="pb-2 text-center">
         <CardTitle className="text-base">Combate {match.id.split('-').pop()}</CardTitle>
-      </CardHeader>
+      </CardHeader> */}
       
       <CardContent>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 pt-3">
           <div className="w-[45%] text-center">
             <div className="flex flex-col items-center">
               {participant1 && (
@@ -106,49 +116,44 @@ export default function MatchCard({ match }: MatchCardProps) {
             <span className="font-medium">{getResultLabel()}</span>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-1">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="text-xs py-1 h-auto"
-              onClick={() => handleResultClick('win1')}
-              disabled={isBye}
-            >
-              {participant1?.name.split(' ')[0]} Gana
-            </Button>
-            
-            {!isBye && (
-              <Button 
-                size="sm" 
+          <div className="flex w-full mt-2">
+            {/* Player 1 win button */}
+            <div className="w-2/5 flex justify-center">
+              <Button
+                size="sm"
                 variant="outline"
                 className="text-xs py-1 h-auto"
-                onClick={() => handleResultClick('win2')}
+                onClick={() => handleResultClick('win1')}
+                disabled={isBye}
               >
-                {participant2?.name.split(' ')[0]} Gana
+                {participant1?.name.split(' ')[0]} Gana
               </Button>
-            )}
-            
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="text-xs py-1 h-auto"
-              onClick={() => handleResultClick('tie')}
-              disabled={isBye}
-            >
-              Empate
-            </Button>
-            
-            {isBye && (
-              <Button 
-                size="sm" 
+            </div>
+            {/* Tie button */}
+            <div className="w-1/5 flex justify-center">
+              <Button
+                size="sm"
                 variant="outline"
                 className="text-xs py-1 h-auto"
-                onClick={() => handleResultClick('bye')}
-                disabled={match.result === 'bye'}
+                onClick={() => handleResultClick('tie')}
+                disabled={isBye}
               >
-                Bye
+                Empate
               </Button>
-            )}
+            </div>
+            {/* Player 2 win button */}
+            <div className="w-2/5 flex justify-center">
+              {!isBye && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs py-1 h-auto"
+                  onClick={() => handleResultClick('win2')}
+                >
+                  {participant2?.name.split(' ')[0]} Gana
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </CardContent>

@@ -3,67 +3,21 @@ import MatchCard from '../components/MatchCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ROUND_COLORS from '../lib/roundColors';
 import { useState } from 'react';
-import { X } from 'lucide-react';
-import BattleCard from '../components/BattleCard';
+import BattleOverlay from '../components/BattleOverlay';
 
 export default function TournamentPublicPage() {
   const { tournament, participants, getCurrentRound } = useAppContext();
   const [battleMatch, setBattleMatch] = useState(null);
-  const [battleAnimatingOut, setBattleAnimatingOut] = useState(false);
-
-  // Helper to get participant by id
-  const getParticipant = (id) => participants.find(p => p.id === id);
-
-  // Battle overlay component
-  const BattleOverlay = ({ match, onClose }) => {
-    if (!match) return null;
-    const p1 = getParticipant(match.participant1Id);
-    const p2 = getParticipant(match.participant2Id);
-    return (
-      <div className={`fixed inset-0 z-50 flex flex-col min-h-screen bg-black/70 transition-opacity duration-1000 ${battleAnimatingOut ? 'opacity-0' : 'opacity-100'}`}>
-        {/* Battle cards container - positioned at exactly 1/4 of screen height */}
-        <div className="relative w-full flex-1">
-          {/* Left card */}
-          <div
-            className={`fixed ${battleAnimatingOut ? 'animate-exitLeftCard' : ''}`}
-            style={{ zIndex: 2, top: '25vh', left: '15%' }}
-          >
-            <BattleCard participant={p1} align="left" />
-          </div>
-          {/* Right card */}
-          <div
-            className={`fixed ${battleAnimatingOut ? 'animate-exitRightCard' : ''}`}
-            style={{ zIndex: 2, top: '25vh', right: '15%' }}
-          >
-            <BattleCard participant={p2} align="right" />
-          </div>
-        </div>
-        <div className="flex justify-center pb-8">
-          <button
-            className={`mt-4 bg-white rounded-full shadow-lg p-3 flex items-center justify-center hover:bg-gray-200 transition-all duration-500 fixed bottom-4 ${battleAnimatingOut ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}
-            onClick={() => {
-              setBattleAnimatingOut(true);
-              setTimeout(() => {
-                setBattleMatch(null);
-                setBattleAnimatingOut(false);
-              }, 1000);
-              if (onClose) onClose();
-            }}
-            aria-label="Cerrar batalla"
-          >
-            <X size={32} className="text-pokemon-red" />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // Animations (add to global CSS or Tailwind config)
-  // .animate-battle-left-in, .animate-battle-right-in, .animate-bounce-left, .animate-bounce-right
 
   return (
     <div className="space-y-6">
-      {battleMatch && <BattleOverlay match={battleMatch} onClose={() => setBattleMatch(null)} />}
+      {battleMatch && (
+        <BattleOverlay 
+          match={battleMatch} 
+          onClose={() => setBattleMatch(null)} 
+          participants={participants}
+        />
+      )}
       <h2 className="text-2xl font-bold text-center mb-2">Torneo KYL de Lolochaa!!</h2>
       <div className="flex justify-center gap-6 mb-4">
         <div className="bg-gray-100 rounded px-4 py-2 text-sm">

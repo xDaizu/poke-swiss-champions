@@ -13,13 +13,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const BASENAME = import.meta.env.DEV ? "/" : "/poke-swiss-champions";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AppProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename={BASENAME}>
           <Routes>
             <Route path="/" element={<Layout><ParticipantsPage /></Layout>} />
             <Route path="/tournament" element={<Layout><TournamentPage /></Layout>} />

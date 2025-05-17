@@ -34,7 +34,8 @@ export default function TournamentPage() {
     startTournament,
     createCustomMatch,
     removeMatch,
-    havePlayed
+    havePlayed,
+    getStandings
   } = useAppContext();
   
   const [customRounds, setCustomRounds] = useState(tournament.rounds.toString());
@@ -107,6 +108,30 @@ export default function TournamentPage() {
     );
   };
 
+  // Automatic pairing for a round
+  const handleAutoPairRound = (roundNumber: number) => {
+    // Get participants not already in a match for this round
+    const matchesInRound = tournament.matches.filter(m => m.round === roundNumber);
+    const pairedIds = new Set<string>();
+    matchesInRound.forEach(m => {
+      if (m.participant1Id) pairedIds.add(m.participant1Id);
+      if (m.participant2Id) pairedIds.add(m.participant2Id);
+    });
+    // Get standings (sorted by points, then resistance)
+    const standings = getStandings().filter(s => !pairedIds.has(s.participant.id));
+    const unpaired = standings.map(s => s.participant);
+    let created = 0;
+    for (let i = 0; i < unpaired.length; i += 2) {
+      const p1 = unpaired[i];
+      const p2 = unpaired[i + 1] || null;
+      if (p1 && (!p2 || !havePlayed(p1.id, p2.id))) {
+        createCustomMatch(roundNumber, p1.id, p2 ? p2.id : null);
+        created++;
+      }
+    }
+    toast.success(`Se crearon ${created} combates automáticamente para la ronda ${roundNumber}`);
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Gestión del Torneo</h2>
@@ -177,14 +202,23 @@ export default function TournamentPage() {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <CardTitle>Ronda {roundNumber}</CardTitle>
-                  <Button 
-                    onClick={() => openAddMatchDialog(roundNumber)}
-                    size="sm"
-                    variant="outline"
-                    className="bg-white hover:bg-gray-100"
-                  >
-                    <Plus className="h-4 w-4 mr-2" /> Agregar Combate
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => openAddMatchDialog(roundNumber)}
+                      size="sm"
+                      variant="outline"
+                      className="bg-white hover:bg-gray-100"
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> Agregar Combate
+                    </Button>
+                    <Button
+                      onClick={() => handleAutoPairRound(roundNumber)}
+                      size="sm"
+                      variant="secondary"
+                    >
+                      Emparejar Automáticamente
+                    </Button>
+                  </div>
                 </div>
                 <CardDescription>
                   {roundActive ? 'Ronda activa' : 'Próxima ronda'} • {roundMatches.length} combates

@@ -188,7 +188,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentRound: 0,
       matches: []
     }));
-    generatePairings();
+    // No automatic match generation
   };
 
   const updateMatchResult = (matchId: string, result: MatchResult) => {

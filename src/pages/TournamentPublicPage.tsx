@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ROUND_COLORS from '../lib/roundColors';
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import BattleCard from '../components/BattleCard';
 
 export default function TournamentPublicPage() {
   const { tournament, participants, getCurrentRound } = useAppContext();
@@ -24,15 +25,15 @@ export default function TournamentPublicPage() {
         <div className="relative w-full flex-1">
           {/* Left card */}
           <div
-            className={`fixed left-0 transition-transform duration-700 ${battleAnimatingOut ? '-translate-x-full opacity-0' : 'translate-x-1/3 animate-battle-left-in'}`}
-            style={{ zIndex: 2, top: '25vh' }}
+            className={`fixed transition-transform duration-700 ${battleAnimatingOut ? '-translate-x-full opacity-0' : ''}`}
+            style={{ zIndex: 2, top: '25vh', left: '15%' }}
           >
             <BattleCard participant={p1} align="left" />
           </div>
           {/* Right card */}
           <div
-            className={`fixed right-0 transition-transform duration-700 ${battleAnimatingOut ? 'translate-x-full opacity-0' : '-translate-x-1/3 animate-battle-right-in'}`}
-            style={{ zIndex: 2, top: '25vh' }}
+            className={`fixed transition-transform duration-700 ${battleAnimatingOut ? 'translate-x-full opacity-0' : ''}`}
+            style={{ zIndex: 2, top: '25vh', right: '15%' }}
           >
             <BattleCard participant={p2} align="right" />
           </div>
@@ -52,38 +53,6 @@ export default function TournamentPublicPage() {
           >
             <X size={32} className="text-pokemon-red" />
           </button>
-        </div>
-      </div>
-    );
-  };
-
-  // BattleCard component
-  const BattleCard = ({ participant, align }) => {
-    if (!participant) return null;
-    return (
-      <div className={`w-96 h-[70vh] bg-white rounded-3xl shadow-2xl border-8 border-pokemon-red p-8 flex flex-col items-center justify-between ${align === 'left' ? 'animate-bounce-left' : 'animate-bounce-right'}`}
-        style={{ minHeight: 480, maxHeight: '90vh' }}
-      >
-        <img
-          src={participant.profileImage}
-          alt={participant.name}
-          className="w-40 h-40 rounded-full border-4 border-gray-300 mb-4 object-cover shadow-lg"
-          onError={e => ((e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Trainer&background=random&rounded=true')}
-        />
-        <div className="font-extrabold text-4xl text-center mb-2 tracking-wide text-pokemon-red drop-shadow-lg uppercase">{participant.name}</div>
-        <div className="text-lg text-gray-700 mb-4 text-center font-semibold italic">{participant.title}</div>
-        <div className="flex flex-wrap justify-center gap-4 mt-2 mb-4">
-          {participant.team.map((pokemon, idx) => (
-            <div key={idx} className="flex flex-col items-center">
-              <img
-                src={pokemon.sprite}
-                alt={pokemon.name}
-                className="w-16 h-16 rounded bg-gray-100 border-2 border-gray-300 shadow"
-                onError={e => ((e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/sprites/001MS.png')}
-              />
-              <span className="text-base font-bold text-gray-800 mt-1 drop-shadow-sm uppercase tracking-tight">{pokemon.name}</span>
-            </div>
-          ))}
         </div>
       </div>
     );

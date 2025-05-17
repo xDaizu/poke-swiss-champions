@@ -118,18 +118,12 @@
     transform: translateX(-100vw) scale(1);
     opacity: 0;
   }
-  60% {
-    transform: translateX(40vw) scale(1.08);
+  80% {
+    transform: translateX(20vw) scale(1.1);
     opacity: 1;
   }
-  75% {
-    transform: translateX(32vw) scale(1.12);
-  }
-  85% {
-    transform: translateX(36vw) scale(0.98);
-  }
   100% {
-    transform: translateX(33vw) scale(1);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
 }
@@ -139,67 +133,84 @@
     transform: translateX(100vw) scale(1);
     opacity: 0;
   }
-  60% {
-    transform: translateX(-40vw) scale(1.08);
+  80% {
+    transform: translateX(-20vw) scale(1.1);
     opacity: 1;
   }
-  75% {
-    transform: translateX(-32vw) scale(1.12);
-  }
-  85% {
-    transform: translateX(-36vw) scale(0.98);
-  }
   100% {
-    transform: translateX(-33vw) scale(1);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes battle-bounce-left {
   0% {
-    transform: translateX(33vw) scale(1);
+    transform: translateX(0) scale(1);
   }
-  20% {
-    transform: translateX(30vw) scale(1.08);
-  }
-  40% {
-    transform: translateX(33vw) scale(0.96);
+  30% {
+    transform: translateX(8vw) scale(0.95);
   }
   60% {
-    transform: translateX(32vw) scale(1.04);
+    transform: translateX(3vw) scale(1.02);
   }
   100% {
-    transform: translateX(33vw) scale(1);
+    transform: translateX(0) scale(1);
   }
 }
 
 @keyframes battle-bounce-right {
   0% {
-    transform: translateX(-33vw) scale(1);
+    transform: translateX(0) scale(1);
   }
-  20% {
-    transform: translateX(-30vw) scale(1.08);
-  }
-  40% {
-    transform: translateX(-33vw) scale(0.96);
+  30% {
+    transform: translateX(-8vw) scale(0.95);
   }
   60% {
-    transform: translateX(-32vw) scale(1.04);
+    transform: translateX(-3vw) scale(1.02);
   }
   100% {
-    transform: translateX(-33vw) scale(1);
+    transform: translateX(0) scale(1);
   }
 }
 
 .animate-battle-left-in {
-  animation: battle-left-in 0.7s cubic-bezier(0.7, 0.1, 0.3, 1.2) both;
+  animation: battle-left-in 0.5s cubic-bezier(0.05, 0.7, 0.1, 1.0) both;
 }
 .animate-battle-right-in {
-  animation: battle-right-in 0.7s cubic-bezier(0.7, 0.1, 0.3, 1.2) both;
+  animation: battle-right-in 0.5s cubic-bezier(0.05, 0.7, 0.1, 1.0) both;
 }
 .animate-bounce-left {
-  animation: battle-bounce-left 0.7s 0.7s cubic-bezier(0.7, 0.1, 0.3, 1.2) both;
+  animation: battle-bounce-left 0.6s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 .animate-bounce-right {
-  animation: battle-bounce-right 0.7s 0.7s cubic-bezier(0.7, 0.1, 0.3, 1.2) both;
+  animation: battle-bounce-right 0.6s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes fadeInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-16rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(16rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeInLeft {
+  animation: fadeInLeft 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fadeInRight {
+  animation: fadeInRight 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

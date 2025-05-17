@@ -1,4 +1,3 @@
-
 export interface Pokemon {
   id: number;
   name: string;
@@ -11,6 +10,7 @@ export interface Participant {
   name: string;
   title: string;
   team: Pokemon[];
+  profileImage?: string;
 }
 
 export interface Match {

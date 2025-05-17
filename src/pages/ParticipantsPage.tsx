@@ -12,9 +12,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { CsvImporter } from '@/services/csvImporter';
 import { searchPokemon } from '@/services/pokemonService';
+import participantsCsv from '../data/participants.csv?raw';
 
 export default function ParticipantsPage() {
-  const { participants, addParticipant, editParticipant, removeParticipant, addParticipantsFromCsv } = useAppContext();
+  const { participants, addParticipant, editParticipant, removeParticipant, addParticipantsFromCsv, setTournament } = useAppContext();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingParticipant, setEditingParticipant] = useState<Participant | undefined>(undefined);
   const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
@@ -111,6 +112,28 @@ export default function ParticipantsPage() {
     }
   };
 
+  // Handler for importing default data
+  const handleImportDefault = async () => {
+    if (!window.confirm('Esto eliminará todos los participantes y datos del torneo actuales y los reemplazará con los datos por defecto. ¿Continuar?')) return;
+    // Remove all participants
+    participants.forEach((p) => removeParticipant(p.id));
+    // Clear tournament data
+    setTournament({
+      rounds: 4,
+      matches: [],
+      currentRound: 1,
+      status: 'not-started',
+      // Add any other default tournament fields as needed
+    });
+    // Import from CSV
+    try {
+      const count = await addParticipantsFromCsv(participantsCsv);
+      toast.success(`Se importaron ${count} participantes por defecto.`);
+    } catch (error) {
+      toast.error('Error al importar los datos por defecto');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -187,6 +210,10 @@ export default function ParticipantsPage() {
           ))}
         </div>
       )}
+
+      <Button onClick={handleImportDefault} variant="destructive" className="mb-4">
+        Importar datos por defecto
+      </Button>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">

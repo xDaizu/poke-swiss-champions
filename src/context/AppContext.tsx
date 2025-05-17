@@ -20,6 +20,8 @@ interface AppContextType {
   addParticipantsFromCsv: (csvData: string) => Promise<number>;
   havePlayed: (id1: string, id2: string) => boolean;
   getCurrentRound: () => number;
+  toggleMatchPublic: (matchId: string) => void;
+  setTournament: React.Dispatch<React.SetStateAction<Tournament>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -71,6 +73,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('pokemon-tournament-data', JSON.stringify(tournament));
   }, [tournament]);
+
+  // Listen for localStorage changes in other tabs and update state
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'pokemon-tournament-data') {
+        const savedTournament = localStorage.getItem('pokemon-tournament-data');
+        if (savedTournament) {
+          setTournament(JSON.parse(savedTournament));
+        }
+      }
+      if (event.key === 'pokemon-tournament-participants') {
+        const savedParticipants = localStorage.getItem('pokemon-tournament-participants');
+        if (savedParticipants) {
+          setParticipants(JSON.parse(savedParticipants));
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   // Participant Management
   const addParticipant = (participant: Participant) => {
@@ -155,7 +177,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             round: nextRound,
             participant1Id: participant1.id,
             participant2Id: participant2.id,
-            result: null
+            result: null,
+            public: false
           });
           
           break;
@@ -171,7 +194,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           round: nextRound,
           participant1Id: participant1.id,
           participant2Id: null,
-          result: 'bye'
+          result: 'bye',
+          public: false
         });
       }
     }
@@ -196,7 +220,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTournament(prev => ({
       ...prev,
       matches: prev.matches.map(m => 
-        m.id === matchId ? { ...m, result } : m
+        m.id === matchId ? { ...m, result, public: true } : m
       )
     }));
   };
@@ -208,7 +232,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       round,
       participant1Id,
       participant2Id,
-      result: participant2Id ? null : 'bye' // If no participant2, it's a bye
+      result: participant2Id ? null : 'bye', // If no participant2, it's a bye
+      public: false
     };
     setTournament(prev => ({
       ...prev,
@@ -304,6 +329,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return complete;
   };
 
+  const toggleMatchPublic = (matchId: string) => {
+    setTournament(prev => ({
+      ...prev,
+      matches: prev.matches.map(m =>
+        m.id === matchId ? { ...m, public: !m.public } : m
+      )
+    }));
+  };
+
   const value = {
     participants,
     tournament,
@@ -321,7 +355,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     removeMatch,
     addParticipantsFromCsv,
     havePlayed,
-    getCurrentRound
+    getCurrentRound,
+    toggleMatchPublic,
+    setTournament
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

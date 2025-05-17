@@ -19,6 +19,7 @@ export interface Match {
   participant1Id: string | null;
   participant2Id: string | null;
   result: MatchResult | null;
+  public: boolean;
 }
 
 export type MatchResult = 'win1' | 'win2' | 'tie' | 'bye';

@@ -2,13 +2,15 @@ import { useAppContext } from '../context/AppContext';
 import { Match, MatchResult } from '../types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match;
+  publicView?: boolean;
 }
 
-export default function MatchCard({ match }: MatchCardProps) {
-  const { getParticipantById, updateMatchResult } = useAppContext();
+export default function MatchCard({ match, publicView = false }: MatchCardProps) {
+  const { getParticipantById, updateMatchResult, toggleMatchPublic } = useAppContext();
   
   const participant1 = getParticipantById(match.participant1Id);
   const participant2 = getParticipantById(match.participant2Id);
@@ -79,7 +81,21 @@ export default function MatchCard({ match }: MatchCardProps) {
             </div>
           </div>
           
-          <div className="text-center w-[10%]">VS</div>
+          <div className="text-center w-[10%] flex flex-col items-center justify-center">
+            <span>VS</span>
+            {/* Eye icon for public/hidden toggle (admin only) */}
+            {!publicView && (
+              <button
+                type="button"
+                className="mt-2 text-gray-400 hover:text-gray-700"
+                title={match.public ? 'Ocultar del público' : 'Mostrar al público'}
+                onClick={() => toggleMatchPublic(match.id)}
+                aria-label={match.public ? 'Ocultar del público' : 'Mostrar al público'}
+              >
+                {match.public ? <Eye size={18} /> : <EyeOff size={18} />}
+              </button>
+            )}
+          </div>
           
           <div className="w-[45%] text-center">
             {isBye ? (
@@ -111,7 +127,18 @@ export default function MatchCard({ match }: MatchCardProps) {
           </div>
         </div>
         
-        {match.result ? (
+        {/* Result section */}
+        {publicView ? (
+          <div className="text-center p-1 bg-gray-100 rounded-md">
+            {isBye ? (
+              <span className="font-medium text-gray-500">Duerme esta ronda...</span>
+            ) : match.result ? (
+              <span className="font-medium">{getResultLabel()}</span>
+            ) : (
+              <span className="font-medium text-gray-400">Aún sin decidir</span>
+            )}
+          </div>
+        ) : match.result ? (
           <div className="text-center p-1 bg-gray-100 rounded-md">
             <span className="font-medium">{getResultLabel()}</span>
           </div>

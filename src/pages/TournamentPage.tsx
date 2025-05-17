@@ -17,14 +17,8 @@ import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { Participant } from '../types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-// Define round colors for containers
-const ROUND_COLORS = [
-  'bg-[#F2FCE2]', // Soft Green
-  'bg-[#FEF7CD]', // Soft Yellow
-  'bg-[#E5DEFF]', // Soft Purple
-  'bg-[#D3E4FD]'  // Soft Blue
-];
+import { PairingService } from '../services/pairingService';
+import ROUND_COLORS from '../lib/roundColors';
 
 export default function TournamentPage() {
   const { 
@@ -111,26 +105,17 @@ export default function TournamentPage() {
 
   // Automatic pairing for a round
   const handleAutoPairRound = (roundNumber: number) => {
-    // Get participants not already in a match for this round
-    const matchesInRound = tournament.matches.filter(m => m.round === roundNumber);
-    const pairedIds = new Set<string>();
-    matchesInRound.forEach(m => {
-      if (m.participant1Id) pairedIds.add(m.participant1Id);
-      if (m.participant2Id) pairedIds.add(m.participant2Id);
+    const pairs = PairingService.autoPairRound(
+      participants,
+      tournament.matches,
+      roundNumber,
+      getStandings,
+      havePlayed
+    );
+    pairs.forEach(([p1, p2]) => {
+      createCustomMatch(roundNumber, p1, p2);
     });
-    // Get standings (sorted by points, then resistance)
-    const standings = getStandings().filter(s => !pairedIds.has(s.participant.id));
-    const unpaired = standings.map(s => s.participant);
-    let created = 0;
-    for (let i = 0; i < unpaired.length; i += 2) {
-      const p1 = unpaired[i];
-      const p2 = unpaired[i + 1] || null;
-      if (p1 && (!p2 || !havePlayed(p1.id, p2.id))) {
-        createCustomMatch(roundNumber, p1.id, p2 ? p2.id : null);
-        created++;
-      }
-    }
-    toast.success(`Se crearon ${created} combates automáticamente para la ronda ${roundNumber}`);
+    toast.success(`Se crearon ${pairs.length} combates automáticamente para la ronda ${roundNumber}`);
   };
 
   return (

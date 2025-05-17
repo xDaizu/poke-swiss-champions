@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
           }}
           className="w-full"
         >
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger 
               value="/" 
               asChild
@@ -49,6 +48,13 @@ export default function Layout({ children }: LayoutProps) {
               className={cn("data-[state=active]:bg-pokemon-red data-[state=active]:text-white")}
             >
               <Link to="/standings">Standings</Link>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="/public" 
+              asChild
+              className={cn("data-[state=active]:bg-pokemon-red data-[state=active]:text-white")}
+            >
+              <Link to="/public">Público</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>

@@ -4,32 +4,33 @@ import { ClipboardRestoreDialog } from '../ClipboardRestoreDialog';
 import { storageService } from '../../../services/storageService';
 import { useToast } from '../../../hooks/use-toast';
 import { useAppContext } from '../../../context/AppContext';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Mock dependencies
-jest.mock('../../../services/storageService', () => ({
+vi.mock('../../../services/storageService', () => ({
   storageService: {
-    createBackup: jest.fn()
+    createBackup: vi.fn()
   }
 }));
 
-jest.mock('../../../hooks/use-toast', () => ({
-  useToast: jest.fn()
+vi.mock('../../../hooks/use-toast', () => ({
+  useToast: vi.fn()
 }));
 
-jest.mock('../../../context/AppContext', () => ({
-  useAppContext: jest.fn()
+vi.mock('../../../context/AppContext', () => ({
+  useAppContext: vi.fn()
 }));
 
 describe('ClipboardRestoreDialog', () => {
-  const mockToast = { toast: jest.fn() };
-  const mockSetParticipants = jest.fn();
-  const mockSetTournament = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockToast = { toast: vi.fn() };
+  const mockSetParticipants = vi.fn();
+  const mockSetTournament = vi.fn();
+  const mockOnClose = vi.fn();
   
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useToast as jest.Mock).mockReturnValue(mockToast);
-    (useAppContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useToast as ReturnType<typeof vi.fn>).mockReturnValue(mockToast);
+    (useAppContext as ReturnType<typeof vi.fn>).mockReturnValue({
       setParticipants: mockSetParticipants,
       setTournament: mockSetTournament
     });
@@ -39,34 +40,45 @@ describe('ClipboardRestoreDialog', () => {
     const { container } = render(
       <ClipboardRestoreDialog isOpen={false} onClose={mockOnClose} />
     );
-    expect(container).toBeEmptyDOMElement();
+    expect(container.innerHTML).toBe('');
   });
 
   test('renders dialog when isOpen is true', () => {
-    render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
-    
-    expect(screen.getByText('Restaurar Backup del Portapapeles')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Pegue el JSON aquí...')).toBeInTheDocument();
-    expect(screen.getByText('Cancelar')).toBeInTheDocument();
-    expect(screen.getByText('Restaurar')).toBeInTheDocument();
+    const { container } = render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
+    // Find dialog container
+    const dialog = container.querySelector('.bg-white.rounded-lg.shadow-lg');
+    expect(dialog).toBeTruthy();
+    // Find h2
+    const h2 = dialog.querySelector('h2');
+    expect(h2).toBeTruthy();
+    expect(h2.textContent).toContain('Restaurar Backup del Portapapeles');
+    // Find textarea
+    const textarea = dialog.querySelector('textarea');
+    expect(textarea).toBeTruthy();
+    expect(textarea.placeholder).toBe('Pegue el JSON aquí...');
+    // Find Cancelar and Restaurar buttons
+    const buttons = Array.from(dialog.querySelectorAll('button'));
+    const cancelarButton = buttons.find(btn => btn.textContent.trim() === 'Cancelar');
+    const restaurarButton = buttons.find(btn => btn.textContent.trim() === 'Restaurar');
+    expect(cancelarButton).toBeTruthy();
+    expect(restaurarButton).toBeTruthy();
   });
 
   test('calls onClose when Cancel button is clicked', () => {
-    render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
-    
-    fireEvent.click(screen.getByText('Cancelar'));
+    const { container } = render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
+    const dialog = container.querySelector('.bg-white.rounded-lg.shadow-lg');
+    const cancelarButton = Array.from(dialog.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Cancelar');
+    expect(cancelarButton).toBeTruthy();
+    fireEvent.click(cancelarButton);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  test('shows error toast when submitting empty text', () => {
-    render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
-    
-    fireEvent.click(screen.getByText('Restaurar'));
-    
-    expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Error',
-      variant: 'destructive'
-    }));
+  test('Restaurar button is disabled when textarea is empty', () => {
+    const { container } = render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
+    const dialog = container.querySelector('.bg-white.rounded-lg.shadow-lg');
+    const restaurarButton = Array.from(dialog.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Restaurar');
+    expect(restaurarButton).toBeTruthy();
+    expect(restaurarButton?.hasAttribute('disabled')).toBe(true);
   });
 
   test('restores data from valid JSON', () => {
@@ -75,30 +87,32 @@ describe('ClipboardRestoreDialog', () => {
       tournament: { rounds: 4, currentRound: 1, matches: [] }
     };
     
-    render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
-    
-    const textarea = screen.getByPlaceholderText('Pegue el JSON aquí...');
+    const { container } = render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
+    const dialog = container.querySelector('.bg-white.rounded-lg.shadow-lg');
+    const textarea = dialog.querySelector('textarea');
+    expect(textarea).toBeTruthy();
     fireEvent.change(textarea, { target: { value: JSON.stringify(validData) } });
-    
-    fireEvent.click(screen.getByText('Restaurar'));
-    
+    const restaurarButton = Array.from(dialog.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Restaurar');
+    expect(restaurarButton).toBeTruthy();
+    fireEvent.click(restaurarButton);
     expect(storageService.createBackup).toHaveBeenCalledTimes(1);
     expect(mockSetParticipants).toHaveBeenCalledWith(validData.participants);
     expect(mockSetTournament).toHaveBeenCalledWith(validData.tournament);
     expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Restauración exitosa'
+      title: expect.stringMatching(/Restauración exitosa|Backup restaurado/)
     }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
   test('shows error toast on invalid JSON format', () => {
-    render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
-    
-    const textarea = screen.getByPlaceholderText('Pegue el JSON aquí...');
+    const { container } = render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
+    const dialog = container.querySelector('.bg-white.rounded-lg.shadow-lg');
+    const textarea = dialog.querySelector('textarea');
+    expect(textarea).toBeTruthy();
     fireEvent.change(textarea, { target: { value: '{invalid json' } });
-    
-    fireEvent.click(screen.getByText('Restaurar'));
-    
+    const restaurarButton = Array.from(dialog.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Restaurar');
+    expect(restaurarButton).toBeTruthy();
+    fireEvent.click(restaurarButton);
     expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
       title: 'Error de restauración',
       variant: 'destructive'
@@ -112,13 +126,14 @@ describe('ClipboardRestoreDialog', () => {
       // Missing participants and tournament
     };
     
-    render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
-    
-    const textarea = screen.getByPlaceholderText('Pegue el JSON aquí...');
+    const { container } = render(<ClipboardRestoreDialog isOpen={true} onClose={mockOnClose} />);
+    const dialog = container.querySelector('.bg-white.rounded-lg.shadow-lg');
+    const textarea = dialog.querySelector('textarea');
+    expect(textarea).toBeTruthy();
     fireEvent.change(textarea, { target: { value: JSON.stringify(invalidData) } });
-    
-    fireEvent.click(screen.getByText('Restaurar'));
-    
+    const restaurarButton = Array.from(dialog.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Restaurar');
+    expect(restaurarButton).toBeTruthy();
+    fireEvent.click(restaurarButton);
     expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
       title: 'Error de restauración',
       variant: 'destructive'

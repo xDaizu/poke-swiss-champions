@@ -1,67 +1,81 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { BackupManager } from '../BackupManager';
 import { storageService } from '../../../services/storageService';
 import { useToast } from '../../../hooks/use-toast';
 import { useAppContext } from '../../../context/AppContext';
 
 // Mock dependencies
-jest.mock('../../../services/storageService', () => ({
+vi.mock('../../../services/storageService', () => ({
   storageService: {
-    getLastBackupTime: jest.fn(),
-    createBackup: jest.fn(),
-    restoreFromBackup: jest.fn()
+    getLastBackupTime: vi.fn(),
+    createBackup: vi.fn(),
+    restoreFromBackup: vi.fn()
   }
 }));
 
-jest.mock('../../../hooks/use-toast', () => ({
-  useToast: jest.fn()
+vi.mock('../../../hooks/use-toast', () => ({
+  useToast: vi.fn()
 }));
 
-jest.mock('../../../context/AppContext', () => ({
-  useAppContext: jest.fn()
+vi.mock('../../../context/AppContext', () => ({
+  useAppContext: vi.fn()
 }));
 
-jest.mock('../ClipboardRestoreDialog', () => ({
+vi.mock('../ClipboardRestoreDialog', () => ({
   ClipboardRestoreDialog: ({ isOpen, onClose }) => 
     isOpen ? <div data-testid="mock-dialog">Restore Dialog <button onClick={onClose}>Close</button></div> : null
 }));
 
 // Mock navigator.clipboard
 const mockClipboard = {
-  writeText: jest.fn(() => Promise.resolve())
+  writeText: vi.fn(() => Promise.resolve())
 };
-Object.assign(navigator, {
-  clipboard: mockClipboard
-});
 
 describe('BackupManager', () => {
-  const mockToast = { toast: jest.fn() };
+  const mockToast = { toast: vi.fn() };
   const mockParticipants = [{ id: '1', name: 'Test', title: 'Champion', team: [] }];
   const mockTournament = { rounds: 4, currentRound: 1, matches: [] };
   const mockLastBackup = new Date('2023-01-01T12:00:00');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useToast as jest.Mock).mockReturnValue(mockToast);
-    (useAppContext as jest.Mock).mockReturnValue({ 
+    vi.clearAllMocks();
+    (useToast as ReturnType<typeof vi.fn>).mockReturnValue(mockToast);
+    (useAppContext as ReturnType<typeof vi.fn>).mockReturnValue({ 
       participants: mockParticipants, 
       tournament: mockTournament 
     });
-    (storageService.getLastBackupTime as jest.Mock).mockReturnValue(mockLastBackup);
+    (storageService.getLastBackupTime as ReturnType<typeof vi.fn>).mockReturnValue(mockLastBackup);
+    // Ensure clipboard is mocked for every test
+    Object.assign(global.navigator, { clipboard: mockClipboard });
   });
 
   test('renders with last backup time', () => {
-    render(<BackupManager />);
-    expect(screen.getByText(/Last backup:/)).toBeInTheDocument();
-    expect(screen.getByText(/Copiar backup al portapapeles/)).toBeInTheDocument();
-    expect(screen.getByText(/Restaurar backup del portapapeles/)).toBeInTheDocument();
+    const { container } = render(<BackupManager />);
+    // Backup label
+    const backupLabel = container.querySelector('p.text-sm.text-gray-500');
+    expect(backupLabel).toBeTruthy();
+    expect(backupLabel?.textContent).toContain('Último backup:');
+    // Button: Crear Backup
+    const crearButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Crear Backup');
+    expect(crearButton).toBeTruthy();
+    // Button: Restaurar Backup
+    const restaurarButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Restaurar Backup');
+    expect(restaurarButton).toBeTruthy();
+    // Button: Copiar al portapapeles
+    const copiarButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Copiar al portapapeles');
+    expect(copiarButton).toBeTruthy();
+    // Button: Restaurar del portapapeles
+    const restaurarPortapapelesButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Restaurar del portapapeles');
+    expect(restaurarPortapapelesButton).toBeTruthy();
   });
   
   test('creates a backup when the create button is clicked', () => {
-    render(<BackupManager />);
-    fireEvent.click(screen.getByText('Create Backup'));
-    
+    const { container } = render(<BackupManager />);
+    const crearButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Crear Backup');
+    expect(crearButton).toBeTruthy();
+    if (crearButton) fireEvent.click(crearButton);
     expect(storageService.createBackup).toHaveBeenCalledTimes(1);
     expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
       title: "Backup created"
@@ -69,11 +83,11 @@ describe('BackupManager', () => {
   });
   
   test('restores a backup when the restore button is clicked', () => {
-    (storageService.restoreFromBackup as jest.Mock).mockReturnValue(true);
-    
-    render(<BackupManager />);
-    fireEvent.click(screen.getByText('Restore Backup'));
-    
+    (storageService.restoreFromBackup as ReturnType<typeof vi.fn>).mockReturnValue(true);
+    const { container } = render(<BackupManager />);
+    const restaurarButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Restaurar Backup');
+    expect(restaurarButton).toBeTruthy();
+    if (restaurarButton) fireEvent.click(restaurarButton);
     expect(storageService.restoreFromBackup).toHaveBeenCalledTimes(1);
     expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
       title: "Backup restored"
@@ -81,20 +95,22 @@ describe('BackupManager', () => {
   });
 
   test('copies data to clipboard when copy button is clicked', async () => {
-    render(<BackupManager />);
-    fireEvent.click(screen.getByText('Copiar backup al portapapeles'));
-    
+    const { container } = render(<BackupManager />);
+    const copiarButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Copiar al portapapeles');
+    expect(copiarButton).toBeTruthy();
+    if (copiarButton) fireEvent.click(copiarButton);
     await waitFor(() => {
       expect(mockClipboard.writeText).toHaveBeenCalledTimes(1);
-      
       // Verify the JSON string passed to clipboard contains the correct data
-      const clipboardData = JSON.parse(mockClipboard.writeText.mock.calls[0][0]);
-      expect(clipboardData).toHaveProperty('participants', mockParticipants);
-      expect(clipboardData).toHaveProperty('tournament', mockTournament);
-      expect(clipboardData).toHaveProperty('version', '1.0');
-      expect(clipboardData).toHaveProperty('exportDate');
+      const writeTextMock = mockClipboard.writeText as unknown as { mock: { calls: any[][] } };
+      if (Array.isArray(writeTextMock.mock.calls) && writeTextMock.mock.calls.length > 0) {
+        const clipboardData = JSON.parse(writeTextMock.mock.calls[0][0]);
+        expect(clipboardData).toHaveProperty('participants', mockParticipants);
+        expect(clipboardData).toHaveProperty('tournament', mockTournament);
+        expect(clipboardData).toHaveProperty('version', '1.0');
+        expect(clipboardData).toHaveProperty('exportDate');
+      }
     });
-    
     expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
       title: "Backup copiado"
     }));
@@ -102,10 +118,10 @@ describe('BackupManager', () => {
   
   test('handles clipboard copy failure', async () => {
     mockClipboard.writeText.mockRejectedValueOnce(new Error('Clipboard error'));
-    
-    render(<BackupManager />);
-    fireEvent.click(screen.getByText('Copiar backup al portapapeles'));
-    
+    const { container } = render(<BackupManager />);
+    const copiarButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Copiar al portapapeles');
+    expect(copiarButton).toBeTruthy();
+    if (copiarButton) fireEvent.click(copiarButton);
     await waitFor(() => {
       expect(mockToast.toast).toHaveBeenCalledWith(expect.objectContaining({
         title: "Error al copiar",
@@ -114,18 +130,31 @@ describe('BackupManager', () => {
     });
   });
   
-  test('opens the restore dialog when the restore from clipboard button is clicked', () => {
-    render(<BackupManager />);
-    fireEvent.click(screen.getByText('Restaurar backup del portapapeles'));
-    
-    expect(screen.getByTestId('mock-dialog')).toBeInTheDocument();
+  test('opens the restore dialog when the restore from clipboard button is clicked', async () => {
+    const { container } = render(<BackupManager />);
+    const restaurarPortapapelesButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Restaurar del portapapeles');
+    expect(restaurarPortapapelesButton).toBeTruthy();
+    if (restaurarPortapapelesButton) fireEvent.click(restaurarPortapapelesButton);
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="mock-dialog"]')).toBeTruthy();
+    });
   });
   
-  test('closes the restore dialog', () => {
-    render(<BackupManager />);
-    fireEvent.click(screen.getByText('Restaurar backup del portapapeles'));
-    fireEvent.click(screen.getByText('Close'));
-    
-    expect(screen.queryByTestId('mock-dialog')).not.toBeInTheDocument();
+  test('closes the restore dialog', async () => {
+    const { container } = render(<BackupManager />);
+    const restaurarPortapapelesButton = Array.from(container.querySelectorAll('button')).find(el => el.textContent === 'Restaurar del portapapeles');
+    expect(restaurarPortapapelesButton).toBeTruthy();
+    if (restaurarPortapapelesButton) fireEvent.click(restaurarPortapapelesButton);
+    // Wait for dialog to appear
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="mock-dialog"]')).toBeTruthy();
+    });
+    // Find the Close button robustly
+    const closeButton = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Close');
+    expect(closeButton).toBeTruthy();
+    if (closeButton) fireEvent.click(closeButton);
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="mock-dialog"]')).toBeFalsy();
+    });
   });
 }); 

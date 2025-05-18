@@ -53,7 +53,7 @@ export default function MatchCard({ match, publicView = false, onShowBattle }: M
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <Card className={`pokemon-card w-full relative ${cardBg}`}>
+    <Card className={`pokemon-card w-full relative ${cardBg}`} data-testid="match-card">
       {/* BYE sleep icon */}
       {isBye && (
         <div className="absolute left-2 top-2 z-10 flex items-center text-blue-400">
@@ -94,15 +94,20 @@ export default function MatchCard({ match, publicView = false, onShowBattle }: M
           <div className="text-center w-[10%] flex flex-col items-center justify-center">
             {/* VS button for public view */}
             {publicView ? (
-              <button
-                type="button"
-                className="text-2xl font-bold text-pokemon-red hover:scale-125 transition-transform duration-200"
-                style={{ outline: 'none', border: 'none', background: 'none', cursor: 'pointer' }}
-                onClick={onShowBattle}
-                aria-label="Mostrar batalla"
-              >
-                VS
-              </button>
+              isBye ? (
+                <span className="text-2xl font-bold text-gray-400" data-testid="vs-disabled">VS</span>
+              ) : (
+                <button
+                  type="button"
+                  className="text-2xl font-bold text-pokemon-red hover:scale-125 transition-transform duration-200"
+                  style={{ outline: 'none', border: 'none', background: 'none', cursor: 'pointer' }}
+                  onClick={onShowBattle}
+                  aria-label="Mostrar batalla"
+                  data-testid="vs-button"
+                >
+                  VS
+                </button>
+              )
             ) : (
               <span>VS</span>
             )}

@@ -171,6 +171,7 @@ export function BackupManager() {
               </button>
               <button
                 onClick={openRestoreDialog}
+                data-testid="restore-clipboard-btn"
                 className="px-4 py-2 text-sm rounded-md bg-pokemon-blue text-white font-medium hover:bg-blue-700 transition shadow-sm"
               >
                 Restaurar del portapapeles

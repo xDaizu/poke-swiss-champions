@@ -134,14 +134,14 @@ export default function ParticipantsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h2 className="text-2xl font-bold">Participantes del Torneo</h2>
-        <div className="space-x-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button onClick={() => setIsCsvImportOpen(true)} variant="outline">
             <Import className="mr-2 h-4 w-4" /> Importar CSV
           </Button>
           <Button onClick={handleImportDefault} variant="destructive">
-            Importar datos torneo KYL
+            <Import className="mr-2 h-4 w-4" /> Datos KYL
           </Button>
           <Button onClick={handleAddClick}>
             <Plus className="mr-2 h-4 w-4" /> Agregar Participante
@@ -163,46 +163,46 @@ export default function ParticipantsPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
           {participants.map((participant) => (
-            <Card key={participant.id} className="pokemon-card">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{participant.name}</CardTitle>
-                    <p className="text-sm text-gray-500">{participant.title}</p>
-                    <div className="flex items-center mt-2">
-                      <Avatar>
-                        <AvatarImage src={participant.profileImage} alt={participant.name} onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Trainer&background=random&rounded=true';
-                        }} />
-                        <AvatarFallback>?</AvatarFallback>
-                      </Avatar>
+            <Card key={participant.id} className="pokemon-card overflow-hidden h-full">
+              <CardHeader className="p-3 pb-1">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Avatar className="h-9 w-9 flex-shrink-0">
+                      <AvatarImage src={participant.profileImage} alt={participant.name} onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Trainer&background=random&rounded=true';
+                      }} />
+                      <AvatarFallback>?</AvatarFallback>
+                    </Avatar>
+                    <div className="overflow-hidden">
+                      <CardTitle className="text-base font-bold truncate">{participant.name}</CardTitle>
+                      <p className="text-xs text-gray-500 truncate">{participant.title}</p>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(participant)}>
+                  <div className="flex space-x-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEditClick(participant)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveClick(participant.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemoveClick(participant.id)}>
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-2">
+              <CardContent className="p-3 pt-0">
+                <div className="grid grid-cols-3 gap-1">
                   {participant.team.map((pokemon, index) => (
                     <div key={`${pokemon.id}-${index}`} className="text-center">
                       <img
                         src={pokemon.sprite}
                         alt={pokemon.name}
-                        className="w-12 h-12 mx-auto"
+                        className="w-10 h-10 mx-auto"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/sprites/001MS.png';
                         }}
                       />
-                      <p className="text-xs mt-1 truncate">{pokemon.name}</p>
+                      <p className="text-xs mt-0.5 truncate">{pokemon.name}</p>
                     </div>
                   ))}
                 </div>

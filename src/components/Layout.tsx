@@ -13,8 +13,8 @@ interface LayoutProps {
 
 // Navigation items configuration
 const navItems = [
-  { path: '/', label: 'Participants', icon: <Home className="mr-2 h-4 w-4" /> },
-  { path: '/tournament', label: 'Tournament', icon: <Trophy className="mr-2 h-4 w-4" /> },
+  { path: '/', label: 'Participantes', icon: <Home className="mr-2 h-4 w-4" /> },
+  { path: '/tournament', label: 'Torneo', icon: <Trophy className="mr-2 h-4 w-4" /> },
   { path: '/standings', label: 'Clasificacion', icon: <Medal className="mr-2 h-4 w-4" /> },
   { path: '/public', label: 'Público', icon: <Users className="mr-2 h-4 w-4" /> },
   { path: '/backup', label: 'Backup', icon: <Save className="mr-2 h-4 w-4" /> },

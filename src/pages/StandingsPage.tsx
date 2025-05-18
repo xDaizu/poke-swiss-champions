@@ -29,7 +29,7 @@ export default function StandingsPage() {
   }
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h2 className="text-2xl font-bold">Clasificación del Torneo</h2>
       
       {tournament.currentRound === 0 ? (
@@ -42,19 +42,19 @@ export default function StandingsPage() {
           <p className="text-lg text-gray-500">No hay clasificación disponible</p>
         </div>
       ) : (
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden">
+          <CardHeader className="py-3">
             <CardTitle>Clasificación Actual</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
+          <CardContent className="p-0">
+            <Table className="[&_tr]:h-auto [&_td]:py-1.5 [&_th]:py-1.5 [&_th]:text-xs">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-10">#</TableHead>
-                  <TableHead>Entrenador</TableHead>
-                  <TableHead className="text-center">Pokémon</TableHead>
-                  <TableHead className="text-center w-4 text-xs">Puntos</TableHead>
-                  <TableHead className="text-center w-4 text-xs">Resistencia</TableHead>
+                  <TableHead className="w-8">#</TableHead>
+                  <TableHead className="w-[55%]">Entrenador</TableHead>
+                  <TableHead className="text-center w-[25%]">Pokémon</TableHead>
+                  <TableHead className="text-center w-8 px-0 text-xs">Pts</TableHead>
+                  <TableHead className="text-center w-10 px-0 text-xs">Res</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -62,21 +62,21 @@ export default function StandingsPage() {
                   const fontSizeClass = getPointsFontClass(points, maxPoints);
                   return (
                     <TableRow key={participant.id}>
-                      <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium py-1 text-center">{index + 1}</TableCell>
+                      <TableCell className="py-0.5 pr-1">
                         <div className="flex flex-col">
-                          <span className="font-semibold">{participant.name}</span>
+                          <span className="font-semibold truncate">{participant.name}</span>
                           <span className="text-xs text-gray-500">{participant.title}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex justify-center space-x-1">
+                      <TableCell className="py-0.5 px-0">
+                        <div className="flex justify-center gap-0">
                           {participant.team.slice(0, 6).map((pokemon, i) => (
                             <img
                               key={i}
                               src={pokemon.sprite}
                               alt={pokemon.name}
-                              className="w-6 h-6"
+                              className="w-5 h-5"
                               title={pokemon.name}
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/sprites/001MS.png';
@@ -85,8 +85,8 @@ export default function StandingsPage() {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell className={`text-center font-semibold w-4 ${fontSizeClass}`}>{points}</TableCell>
-                      <TableCell className="text-center w-4">{resistance}</TableCell>
+                      <TableCell className={`text-center font-semibold px-0 py-0.5 min-w-0 ${fontSizeClass}`}>{points}</TableCell>
+                      <TableCell className="text-center px-0 py-0.5 min-w-0">{resistance}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -97,13 +97,13 @@ export default function StandingsPage() {
       )}
       
       <Card>
-        <CardHeader>
+        <CardHeader className="py-3">
           <CardTitle>Sistema de Puntuación</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="py-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="text-lg font-medium mb-2">Puntos</h4>
+              <h4 className="text-lg font-medium mb-1">Puntos</h4>
               <ul className="list-disc list-inside space-y-1">
                 <li>Victoria: 2 puntos</li>
                 <li>Empate: 1 punto</li>
@@ -112,7 +112,7 @@ export default function StandingsPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-medium mb-2">Resistencia</h4>
+              <h4 className="text-lg font-medium mb-1">Resistencia</h4>
               <p className="text-sm text-gray-600">
                 La resistencia de un participante se calcula como la suma de los puntos obtenidos por todos sus oponentes durante el torneo. Una mayor resistencia indica que se han enfrentado a oponentes más fuertes.
               </p>

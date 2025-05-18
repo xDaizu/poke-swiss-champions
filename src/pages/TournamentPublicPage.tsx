@@ -2,12 +2,35 @@ import { useAppContext } from '../context/AppContext';
 import MatchCard from '../components/MatchCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ROUND_COLORS from '../lib/roundColors';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import BattleOverlay from '../components/BattleOverlay';
 
 export default function TournamentPublicPage() {
   const { tournament, participants, getCurrentRound } = useAppContext();
   const [battleMatch, setBattleMatch] = useState(null);
+  const [shownMatchIds, setShownMatchIds] = useState<string[]>([]);
+  const prevMatchIdsRef = useRef<string[]>([]);
+  const [justAppeared, setJustAppeared] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Collect all public match IDs
+    const allPublicMatchIds = tournament.matches.filter(m => m.public).map(m => m.id);
+
+    // Find new matches (now public)
+    const newMatches = allPublicMatchIds.filter(id => !shownMatchIds.includes(id));
+    if (newMatches.length > 0) {
+      setJustAppeared(prev => [...prev, ...newMatches]);
+      setShownMatchIds(prev => [...prev, ...newMatches]);
+    }
+
+    // Find matches that were public but are now hidden
+    const nowHidden = shownMatchIds.filter(id => !allPublicMatchIds.includes(id));
+    if (nowHidden.length > 0) {
+      setShownMatchIds(prev => prev.filter(id => allPublicMatchIds.includes(id)));
+    }
+
+    prevMatchIdsRef.current = allPublicMatchIds;
+  }, [tournament.matches, shownMatchIds]);
 
   return (
     <div className="space-y-6">
@@ -41,14 +64,24 @@ export default function TournamentPublicPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {roundMatches.map(match => (
-                    <MatchCard
-                      key={match.id}
-                      match={match}
-                      publicView={true}
-                      onShowBattle={() => setBattleMatch(match)}
-                    />
-                  ))}
+                  {roundMatches.map(match => {
+                    const isBouncing = justAppeared.includes(match.id);
+                    return (
+                      <div
+                        key={match.id}
+                        className={isBouncing ? 'animate-bounce-in' : ''}
+                        onAnimationEnd={() => {
+                          if (isBouncing) setJustAppeared(prev => prev.filter(id => id !== match.id));
+                        }}
+                      >
+                        <MatchCard
+                          match={match}
+                          publicView={true}
+                          onShowBattle={() => setBattleMatch(match)}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

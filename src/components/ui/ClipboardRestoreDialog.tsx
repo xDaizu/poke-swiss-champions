@@ -41,7 +41,7 @@ export function ClipboardRestoreDialog({ isOpen, onClose }: ClipboardRestoreDial
       setTournament(data.tournament);
       
       toast({
-        title: 'Restauración exitosa',
+        title: 'Backup restaurado',
         description: 'Los datos del torneo han sido restaurados correctamente.',
         variant: 'default'
       });

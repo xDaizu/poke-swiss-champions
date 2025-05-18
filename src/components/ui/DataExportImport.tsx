@@ -22,14 +22,14 @@ export function DataExportImport() {
       const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
       
       // Create link and trigger download
-      const exportName = `pokemon-tournament-export-${new Date().toISOString().slice(0,10)}.json`;
+      const exportName = `pokemon-tournament-backup-${new Date().toISOString().slice(0,10)}.json`;
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
       linkElement.setAttribute('download', exportName);
       linkElement.click();
       
       toast({
-        title: 'Exportación exitosa',
+        title: 'Backup exportado',
         description: 'Los datos del torneo han sido exportados correctamente.',
         variant: 'default'
       });
@@ -69,7 +69,7 @@ export function DataExportImport() {
         setTournament(importData.tournament);
         
         toast({
-          title: 'Importación exitosa',
+          title: 'Backup importado',
           description: 'Los datos del torneo han sido importados correctamente.',
           variant: 'default'
         });
@@ -107,17 +107,17 @@ export function DataExportImport() {
       <div className="p-5">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-medium text-gray-800">Exportar/Importar Datos</h3>
+            <h3 className="text-base font-medium text-gray-800">Exportar/Importar Backups</h3>
             <p className="text-sm text-gray-500">
-              Exporta tus datos como archivo JSON o importa desde un archivo guardado
+              Exporta tus backups como archivo JSON o impórtalos desde un archivo guardado
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleExport}
-              className="px-4 py-2 text-sm rounded-md bg-pokemon-green text-white font-medium hover:bg-green-700 transition shadow-sm"
+              className="px-4 py-2 text-sm rounded-md bg-pokemon-yellow text-pokemon-dark font-medium hover:bg-yellow-400 transition shadow-sm"
             >
-              Exportar Datos
+              Exportar Backup
             </button>
             
             <label className={`relative px-4 py-2 text-sm rounded-md font-medium transition shadow-sm ${
@@ -125,7 +125,7 @@ export function DataExportImport() {
                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                 : "bg-pokemon-blue text-white hover:bg-blue-700 cursor-pointer"
             }`}>
-              {isImporting ? "Importando..." : "Importar Datos"}
+              {isImporting ? "Importando..." : "Importar Backup"}
               <input
                 type="file"
                 accept=".json"

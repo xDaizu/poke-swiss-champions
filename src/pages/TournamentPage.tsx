@@ -236,7 +236,7 @@ export default function TournamentPage() {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-gray-200 hover:bg-gray-300 p-1"
+                          className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-gray-200 hover:bg-gray-300 p-1 z-20"
                           onClick={() => handleRemoveMatch(match.id)}
                         >
                           <X size={12} />

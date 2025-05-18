@@ -41,6 +41,23 @@ export class PairingService {
         if (sa.points !== sb.points) return sa.points - sb.points;
         return sa.resistance - sb.resistance;
       });
+      // Find all with the lowest points and resistance
+      if (byeCandidates.length > 1) {
+        const standingsSorted = byeCandidates.map(p => standingsForUnpaired.find(s => s.participant.id === p.id));
+        const minPoints = Math.min(...standingsSorted.map(s => s?.points ?? 0));
+        const minResistance = Math.min(...standingsSorted.filter(s => (s?.points ?? 0) === minPoints).map(s => s?.resistance ?? 0));
+        const lowestCandidates = byeCandidates.filter(p => {
+          const s = standingsForUnpaired.find(s2 => s2.participant.id === p.id);
+          return s && s.points === minPoints && s.resistance === minResistance;
+        });
+        // Pick one at random if there are several
+        if (lowestCandidates.length > 1) {
+          const randomIdx = Math.floor(Math.random() * lowestCandidates.length);
+          byeCandidates = [lowestCandidates[randomIdx]];
+        } else if (lowestCandidates.length === 1) {
+          byeCandidates = [lowestCandidates[0]];
+        }
+      }
       const byeCandidate = byeCandidates[0];
       pairs.push([byeCandidate.id, null]);
       unpaired = unpaired.filter(p => p.id !== byeCandidate.id);

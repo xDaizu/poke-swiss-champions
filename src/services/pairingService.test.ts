@@ -163,4 +163,69 @@ describe('PairingService.autoPairRound', () => {
     // BYE should go to B (lowest resistance among tied points, and hasn't had a BYE)
     expect(pairs).toContainEqual(['B', null]);
   });
+});
+
+describe('PairingService BYE randomness', () => {
+  it('does not always pick the same BYE candidate when several are eligible', () => {
+    // Setup: 3 participants, all with same points/resistance, none have had a BYE
+    const participants = [
+      { id: 'A' }, { id: 'B' }, { id: 'C' }
+    ];
+    const standings = [
+      { participant: participants[0], points: 0, resistance: 0 },
+      { participant: participants[1], points: 0, resistance: 0 },
+      { participant: participants[2], points: 0, resistance: 0 },
+    ];
+    const matches = []; // No one has had a BYE yet
+    const getStandings = () => standings;
+    const havePlayed = () => false;
+
+    // Run the pairing many times and count BYE assignments
+    const byeCounts = { A: 0, B: 0, C: 0 };
+    const runs = 1000;
+    for (let i = 0; i < runs; i++) {
+      const pairs = PairingService.autoPairRound(participants, matches, 1, getStandings, havePlayed);
+      const bye = pairs.find(([_, p2]) => p2 === null);
+      if (bye) byeCounts[bye[0]]++;
+    }
+
+    // At least two different participants should have received a BYE
+    const picked = Object.values(byeCounts).filter(count => count > 0).length;
+    expect(picked).toBeGreaterThan(1);
+  });
+
+  it('only picks among true BYE candidates (lowest score, no BYE)', () => {
+    // 5 participants: D and E have lowest score, A/B/C have higher points
+    const participants = [
+      { id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }, { id: 'E' }
+    ];
+    const standings = [
+      { participant: participants[0], points: 3, resistance: 0 },
+      { participant: participants[1], points: 2, resistance: 0 },
+      { participant: participants[2], points: 1, resistance: 0 },
+      { participant: participants[3], points: 0, resistance: 0 }, // D
+      { participant: participants[4], points: 0, resistance: 0 }, // E
+    ];
+    const matches = []; // No one has had a BYE yet
+    const getStandings = () => standings;
+    const havePlayed = () => false;
+
+    // Run the pairing many times and count BYE assignments
+    const byeCounts = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+    const runs = 1000;
+    for (let i = 0; i < runs; i++) {
+      const pairs = PairingService.autoPairRound(participants, matches, 1, getStandings, havePlayed);
+      const bye = pairs.find(([_, p2]) => p2 === null);
+      if (bye) byeCounts[bye[0]]++;
+    }
+
+    // Only D and E should ever be picked
+    expect(byeCounts.A).toBe(0);
+    expect(byeCounts.B).toBe(0);
+    expect(byeCounts.C).toBe(0);
+    expect(byeCounts.D + byeCounts.E).toBe(1000);
+    // Both D and E should be picked at least once
+    expect(byeCounts.D).toBeGreaterThan(0);
+    expect(byeCounts.E).toBeGreaterThan(0);
+  });
 }); 

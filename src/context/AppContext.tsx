@@ -46,6 +46,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     currentRound: 0,
     matches: []
   });
+  const [loaded, setLoaded] = useState(false);
 
   // Load data from storage service on first mount
   useEffect(() => {
@@ -59,22 +60,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTournament(savedTournament);
     } catch (error) {
       console.error('Error loading data from storage:', error);
+    } finally {
+      setLoaded(true);
     }
   }, []);
 
-  // Save data to storage service whenever it changes
+  // Save data to storage service whenever it changes, but only after initial load
   useEffect(() => {
-    storageService.saveParticipants(participants);
-  }, [participants]);
+    if (loaded) {
+      storageService.saveParticipants(participants);
+    }
+  }, [participants, loaded]);
 
   useEffect(() => {
-    storageService.saveTournament(tournament);
-  }, [tournament]);
+    if (loaded) {
+      storageService.saveTournament(tournament);
+    }
+  }, [tournament, loaded]);
 
   // Listen for localStorage changes in other tabs and update state
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
-      if (event.key === 'pokemon-tournament-data') {
+      if (event.key === 'poke-swiss-champions:tournament') {
         try {
           const savedTournament = storageService.loadTournament();
           setTournament(savedTournament);
@@ -82,7 +89,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.error('Error handling storage event for tournament:', error);
         }
       }
-      if (event.key === 'pokemon-tournament-participants') {
+      if (event.key === 'poke-swiss-champions:participants') {
         try {
           const savedParticipants = storageService.loadParticipants();
           setParticipants(savedParticipants);

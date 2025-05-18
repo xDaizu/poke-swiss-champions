@@ -2,11 +2,11 @@ import { Participant, Tournament } from '../types';
 
 // Storage keys
 const KEYS = {
-  PARTICIPANTS: 'pokemon-tournament-participants',
-  TOURNAMENT: 'pokemon-tournament-data',
-  BACKUP_PARTICIPANTS: 'pokemon-tournament-participants-backup',
-  BACKUP_TOURNAMENT: 'pokemon-tournament-data-backup',
-  LAST_BACKUP: 'pokemon-tournament-last-backup'
+  PARTICIPANTS: 'poke-swiss-champions:participants',
+  TOURNAMENT: 'poke-swiss-champions:tournament',
+  BACKUP_PARTICIPANTS: 'poke-swiss-champions:participants-backup',
+  BACKUP_TOURNAMENT: 'poke-swiss-champions:tournament-backup',
+  LAST_BACKUP: 'poke-swiss-champions:last-backup'
 };
 
 // Maximum backup versions to keep

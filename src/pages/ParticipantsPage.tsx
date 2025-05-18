@@ -8,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash, Import } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
+import { ParticipantAvatarFallback } from '@/components/ui/avatar-fallback';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { CsvImporter } from '@/services/csvImporter';
 import { searchPokemon } from '@/services/pokemonService';
 import participantsCsv from '../data/participants.csv?raw';
+import { generateAvatarUrl } from '@/lib/avatar';
 
 export default function ParticipantsPage() {
   const { participants, addParticipant, editParticipant, removeParticipant, addParticipantsFromCsv, setTournament } = useAppContext();
@@ -170,10 +172,10 @@ export default function ParticipantsPage() {
                 <div className="flex justify-between items-start gap-2">
                   <div className="flex items-center gap-2 overflow-hidden">
                     <Avatar className="h-9 w-9 flex-shrink-0">
-                      <AvatarImage src={participant.profileImage} alt={participant.name} onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Trainer&background=random&rounded=true';
-                      }} />
-                      <AvatarFallback>?</AvatarFallback>
+                      <ParticipantAvatarFallback 
+                        name={participant.name} 
+                        team={participant.team} 
+                      />
                     </Avatar>
                     <div className="overflow-hidden">
                       <CardTitle className="text-base font-bold truncate">{participant.name}</CardTitle>

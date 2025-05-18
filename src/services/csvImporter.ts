@@ -1,4 +1,5 @@
 import { Participant, Pokemon } from '../types';
+import { generateAvatarUrl } from '../lib/avatar';
 
 /**
  * Result of a CSV import operation
@@ -134,14 +135,8 @@ export class CsvImporter {
 
         // Use a default gender-neutral profile image if none provided
         if (!profileImage) {
-          // Use initials from the trainer's name for the avatar
-          const initials = name
-            .split(' ')
-            .filter(Boolean)
-            .map(word => word[0]?.toUpperCase() || '')
-            .join('')
-            .slice(0, 2) || 'TR';
-          profileImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random&rounded=true`;
+          // Generate avatar based on name and Pokémon team
+          profileImage = generateAvatarUrl(name, pokemonTeam);
         }
 
         // Check if we have all required Pokémon

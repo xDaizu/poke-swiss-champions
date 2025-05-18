@@ -1,4 +1,5 @@
 import React from 'react';
+import { generateAvatarUrl } from '@/lib/avatar';
 
 interface BattleCardProps {
   participant: any;
@@ -23,6 +24,17 @@ const getPokemonSpriteUrl = (pokemon: any): string => {
 
 const BattleCard: React.FC<BattleCardProps> = ({ participant, align }) => {
   if (!participant) return null;
+  
+  // Generate dynamic avatar URL if profile image is missing
+  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    if (participant.team) {
+      e.currentTarget.src = generateAvatarUrl(participant.name, participant.team);
+    } else {
+      // Fallback if no team data is available
+      e.currentTarget.src = 'https://ui-avatars.com/api/?name=Trainer&background=random&rounded=true';
+    }
+  };
+  
   return (
     <div
       className={`bg-white rounded-2xl shadow-xl border-4 border-pokemon-red px-2 pt-4 pb-4 flex flex-col items-center justify-between
@@ -36,7 +48,7 @@ const BattleCard: React.FC<BattleCardProps> = ({ participant, align }) => {
         src={participant.profileImage}
         alt={participant.name}
         className="w-20 h-20 rounded-full border-2 border-gray-300 mb-1 object-cover shadow"
-        onError={e => ((e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Trainer&background=random&rounded=true')}
+        onError={handleAvatarError}
       />
       <div className="flex flex-col items-center mb-1">
         <div className="font-extrabold text-2xl text-center tracking-wide text-pokemon-red drop-shadow-lg uppercase">

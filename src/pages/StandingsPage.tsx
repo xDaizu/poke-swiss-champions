@@ -1,5 +1,8 @@
 import { useAppContext } from '../context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar } from '@/components/ui/avatar';
+import { ParticipantAvatarFallback } from '@/components/ui/avatar-fallback';
+import { generateAvatarUrl } from '@/lib/avatar';
 import {
   Table,
   TableBody,
@@ -65,7 +68,15 @@ export default function StandingsPage() {
                       <TableCell className="font-medium py-1 text-center">{index + 1}</TableCell>
                       <TableCell className="py-0.5 pr-1">
                         <div className="flex flex-col">
-                          <span className="font-semibold truncate">{participant.name}</span>
+                          <div className="flex items-center gap-1">
+                            <Avatar className="h-5 w-5 flex-shrink-0">
+                              <ParticipantAvatarFallback 
+                                name={participant.name} 
+                                team={participant.team} 
+                              />
+                            </Avatar>
+                            <span className="font-semibold truncate">{participant.name}</span>
+                          </div>
                           <span className="text-xs text-gray-500">{participant.title}</span>
                         </div>
                       </TableCell>

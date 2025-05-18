@@ -78,6 +78,7 @@ export default function TournamentPublicPage() {
                           match={match}
                           publicView={true}
                           onShowBattle={() => setBattleMatch(match)}
+                          blurIn={isBouncing}
                         />
                       </div>
                     );

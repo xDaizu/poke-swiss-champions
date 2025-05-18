@@ -9,9 +9,10 @@ interface MatchCardProps {
   match: Match;
   publicView?: boolean;
   onShowBattle?: () => void;
+  blurIn?: boolean;
 }
 
-export default function MatchCard({ match, publicView = false, onShowBattle }: MatchCardProps) {
+export default function MatchCard({ match, publicView = false, onShowBattle, blurIn }: MatchCardProps) {
   const { getParticipantById, updateMatchResult, toggleMatchPublic } = useAppContext();
   
   const participant1 = getParticipantById(match.participant1Id);
@@ -68,8 +69,8 @@ export default function MatchCard({ match, publicView = false, onShowBattle }: M
             <div className="flex flex-col items-center">
               {participant1 && (
                 <>
-                  <span className="font-medium truncate max-w-full">{participant1.name}</span>
-                  <span className="text-xs text-gray-500 truncate max-w-full">{participant1.title}</span>
+                  <span className={`font-medium truncate max-w-full${blurIn ? ' animate-blur-in' : ''}`}>{participant1.name}</span>
+                  <span className={`text-xs text-gray-500 truncate max-w-full${blurIn ? ' animate-blur-in' : ''}`}>{participant1.title}</span>
                   
                   {participant1.team.length > 0 && (
                     <div className="flex space-x-1 mt-1">
@@ -130,8 +131,8 @@ export default function MatchCard({ match, publicView = false, onShowBattle }: M
               <span className="text-gray-500">— BYE —</span>
             ) : participant2 ? (
               <div className="flex flex-col items-center">
-                <span className="font-medium truncate max-w-full">{participant2.name}</span>
-                <span className="text-xs text-gray-500 truncate max-w-full">{participant2.title}</span>
+                <span className={`font-medium truncate max-w-full${blurIn ? ' animate-blur-in' : ''}`}>{participant2.name}</span>
+                <span className={`text-xs text-gray-500 truncate max-w-full${blurIn ? ' animate-blur-in' : ''}`}>{participant2.title}</span>
                 
                 {participant2.team.length > 0 && (
                   <div className="flex space-x-1 mt-1">
@@ -161,7 +162,7 @@ export default function MatchCard({ match, publicView = false, onShowBattle }: M
             {isBye ? (
               <span className="font-medium text-gray-500">Duerme esta ronda...</span>
             ) : match.result ? (
-              <span className="font-medium">{getResultLabel()}</span>
+              <span className={`font-medium${blurIn ? ' animate-blur-in' : ''}`}>{getResultLabel()}</span>
             ) : (
               <span className="font-medium text-gray-400">Aún sin decidir</span>
             )}
@@ -209,7 +210,7 @@ export default function MatchCard({ match, publicView = false, onShowBattle }: M
         ) : (
           <div className="flex items-center justify-center gap-2">
             <div className="text-center p-1 bg-gray-100 rounded-md">
-              <span className="font-medium">{getResultLabel()}</span>
+              <span className={`font-medium${blurIn ? ' animate-blur-in' : ''}`}>{getResultLabel()}</span>
             </div>
             {/* Edit button (admin only, if result is set) */}
             {!publicView && match.result && (

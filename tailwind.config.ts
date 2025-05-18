@@ -104,12 +104,18 @@ export default {
 					'80%': { transform: 'scale(0.95)' },
 					'100%': { transform: 'scale(1)' },
 				},
+				'blur-in': {
+					'0%': { filter: 'blur(8px)', opacity: '0' },
+					'60%': { filter: 'blur(2px)', opacity: '0.7' },
+					'100%': { filter: 'blur(0)', opacity: '1' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'float': 'float 3s ease-in-out infinite',
 				'bounce-in': 'bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+				'blur-in': 'blur-in 2s cubic-bezier(0.4, 0, 0.2, 1) both',
 			}
 		}
 	},

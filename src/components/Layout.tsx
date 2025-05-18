@@ -27,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
           }}
           className="w-full"
         >
-          <TabsList className="w-full grid grid-cols-4">
+          <TabsList className="w-full grid grid-cols-5">
             <TabsTrigger 
               value="/" 
               asChild
@@ -55,6 +55,13 @@ export default function Layout({ children }: LayoutProps) {
               className={cn("data-[state=active]:bg-pokemon-red data-[state=active]:text-white")}
             >
               <Link to="/public">Público</Link>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="/backup" 
+              asChild
+              className={cn("data-[state=active]:bg-pokemon-red data-[state=active]:text-white")}
+            >
+              <Link to="/backup">Backup</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>

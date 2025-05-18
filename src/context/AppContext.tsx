@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Participant, Match, Tournament, MatchResult } from '../types';
 import { CsvImporter } from '../services/csvImporter';
+import { storageService } from '../services/storageService';
 
 interface AppContextType {
   participants: Participant[];
@@ -22,6 +23,9 @@ interface AppContextType {
   getCurrentRound: () => number;
   toggleMatchPublic: (matchId: string) => void;
   setTournament: React.Dispatch<React.SetStateAction<Tournament>>;
+  setParticipants: React.Dispatch<React.SetStateAction<Participant[]>>;
+  createDataBackup: () => void;
+  restoreFromBackup: () => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -43,56 +47,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     matches: []
   });
 
-  // Load data from localStorage on first mount
+  // Load data from storage service on first mount
   useEffect(() => {
-    const savedParticipants = localStorage.getItem('pokemon-tournament-participants');
-    const savedTournament = localStorage.getItem('pokemon-tournament-data');
-    
-    if (savedParticipants) {
-      try {
-        setParticipants(JSON.parse(savedParticipants));
-      } catch (error) {
-        console.error('Error parsing participants data:', error);
-      }
-    }
-    
-    if (savedTournament) {
-      try {
-        setTournament(JSON.parse(savedTournament));
-      } catch (error) {
-        console.error('Error parsing tournament data:', error);
-      }
+    try {
+      // Load participants
+      const savedParticipants = storageService.loadParticipants();
+      setParticipants(savedParticipants);
+      
+      // Load tournament data
+      const savedTournament = storageService.loadTournament();
+      setTournament(savedTournament);
+    } catch (error) {
+      console.error('Error loading data from storage:', error);
     }
   }, []);
 
-  // Save data to localStorage whenever it changes
+  // Save data to storage service whenever it changes
   useEffect(() => {
-    localStorage.setItem('pokemon-tournament-participants', JSON.stringify(participants));
+    storageService.saveParticipants(participants);
   }, [participants]);
 
   useEffect(() => {
-    localStorage.setItem('pokemon-tournament-data', JSON.stringify(tournament));
+    storageService.saveTournament(tournament);
   }, [tournament]);
 
   // Listen for localStorage changes in other tabs and update state
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       if (event.key === 'pokemon-tournament-data') {
-        const savedTournament = localStorage.getItem('pokemon-tournament-data');
-        if (savedTournament) {
-          setTournament(JSON.parse(savedTournament));
+        try {
+          const savedTournament = storageService.loadTournament();
+          setTournament(savedTournament);
+        } catch (error) {
+          console.error('Error handling storage event for tournament:', error);
         }
       }
       if (event.key === 'pokemon-tournament-participants') {
-        const savedParticipants = localStorage.getItem('pokemon-tournament-participants');
-        if (savedParticipants) {
-          setParticipants(JSON.parse(savedParticipants));
+        try {
+          const savedParticipants = storageService.loadParticipants();
+          setParticipants(savedParticipants);
+        } catch (error) {
+          console.error('Error handling storage event for participants:', error);
         }
       }
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
+
+  // Set up automatic backups
+  useEffect(() => {
+    // Create an initial backup
+    storageService.createBackup();
+    
+    // Create a backup every 30 minutes
+    const backupInterval = setInterval(() => {
+      console.log('Creating scheduled backup...');
+      storageService.createBackup();
+    }, 30 * 60 * 1000); // 30 minutes in milliseconds
+    
+    return () => clearInterval(backupInterval);
+  }, []);
+
+  // Backup functions
+  const createDataBackup = () => {
+    storageService.createBackup();
+  };
+
+  const restoreFromBackup = () => {
+    const success = storageService.restoreFromBackup();
+    if (success) {
+      // Reload the data from storage
+      const savedParticipants = storageService.loadParticipants();
+      setParticipants(savedParticipants);
+      
+      const savedTournament = storageService.loadTournament();
+      setTournament(savedTournament);
+    }
+    return success;
+  };
 
   // Participant Management
   const addParticipant = (participant: Participant) => {
@@ -357,7 +390,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     havePlayed,
     getCurrentRound,
     toggleMatchPublic,
-    setTournament
+    setTournament,
+    setParticipants,
+    createDataBackup,
+    restoreFromBackup
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -47,7 +47,7 @@ export default function Layout({ children }: LayoutProps) {
               asChild
               className={cn("data-[state=active]:bg-pokemon-red data-[state=active]:text-white")}
             >
-              <Link to="/standings">Standings</Link>
+              <Link to="/standings">Clasificacion</Link>
             </TabsTrigger>
             <TabsTrigger 
               value="/public" 

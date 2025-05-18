@@ -140,6 +140,9 @@ export default function ParticipantsPage() {
           <Button onClick={() => setIsCsvImportOpen(true)} variant="outline">
             <Import className="mr-2 h-4 w-4" /> Importar CSV
           </Button>
+          <Button onClick={handleImportDefault} variant="destructive">
+            Importar datos torneo KYL
+          </Button>
           <Button onClick={handleAddClick}>
             <Plus className="mr-2 h-4 w-4" /> Agregar Participante
           </Button>
@@ -208,10 +211,6 @@ export default function ParticipantsPage() {
           ))}
         </div>
       )}
-
-      <Button onClick={handleImportDefault} variant="destructive" className="mb-4">
-        Importar datos por defecto
-      </Button>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
